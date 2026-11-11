@@ -9,7 +9,7 @@ This report is a presentation-ready summary of the work completed in the VaxInsi
 
 The report is evidence-based. It does not claim that the mobile application,
 dataset, machine-learning model, or SHAP explanations exist. The backend has a
-provisional reviewer workflow, but it is not presented as formally approved for
+provisional Health Expert workflow, but it is not presented as formally approved for
 production use.
 
 ## 1. Executive Summary
@@ -18,7 +18,7 @@ VaxInsight currently has a tested FastAPI and PostgreSQL backend foundation. The
 
 The narrative module now supports validated submission, owner-only listing and retrieval, updates, immutable revision history, audit events, pagination, PostgreSQL row-lock concurrency protection, database integrity constraints, controlled persistence failures, and write rate limiting.
 
-The mobile directory is empty and the authoritative dataset has not been received. No model, prediction endpoint, SHAP/LIME explanation service, notification module, or approved public-health content integration has been implemented. A minimal provisional human reviewer assignment and review workflow now exists in the backend; its formal qualification and governance decisions remain unresolved.
+The mobile directory is empty and the authoritative dataset has not been received. No model, prediction endpoint, SHAP/LIME explanation service, notification module, or approved public-health content integration has been implemented. A minimal provisional Health Expert assignment and review workflow now exists in the backend; its formal qualification and governance decisions remain unresolved.
 
 ## 2. Progress At A Glance
 
@@ -32,7 +32,7 @@ The mobile directory is empty and the authoritative dataset has not been receive
 | Security hardening | Completed for current backend scope | JWT validation, Argon2, refresh rotation, rate limiting, headers, sanitized validation errors |
 | Neutral narrative foundation | Partially complete by design | Narrative records and owner-only history exist; final workflow decisions remain open |
 | Narrative concurrency and integrity hardening | Completed | PostgreSQL row-lock test, rollback test, unique revision constraint, integrity migration |
-| Reviewer workflow | Provisional backend implementation | Assignment, active-reviewer access, structured review history, evidence, reassignment, revocation, and explicit escalation exist; formal qualification and production policy remain unresolved |
+| Health Expert workflow | Provisional backend implementation | Assignment, active Health Expert access, structured review history, evidence, reassignment, revocation, and explicit escalation exist; formal qualification and production policy remain unresolved |
 | In-app notifications | Not implemented | Notification channels and policy remain unresolved |
 | Dataset assessment | Blocked | Dataset has not been received |
 | Machine learning | Blocked | Task, labels, features, and target are unknown |
@@ -48,7 +48,7 @@ The mobile directory is empty and the authoritative dataset has not been receive
 
 - Community self-registration with full name, email, password, and password confirmation.
 - Public registration assigns only the server-controlled `community_member` role.
-- Invitation-based onboarding for CHWs, reviewers, and administrators; staff roles are not selectable during public registration.
+- Invitation-based onboarding for CHWs, Health Experts, and administrators; staff roles are not selectable during public registration.
 - Login with short-lived JWT access tokens.
 - Rotating persisted refresh sessions.
 - Logout and logout-all.
@@ -88,7 +88,7 @@ The mobile directory is empty and the authoritative dataset has not been receive
 - Permission inspection endpoints expose the catalogue, role mapping, and a user's
   effective permissions without allowing permission editing or custom roles.
 - Unknown permissions and reserved future permissions fail closed.
-- Narrative action permissions remain subject to owner queries. Reviewers can access
+- Narrative action permissions remain subject to owner queries. Health Experts can access
   only active assignments through the separate review resource, while assignment
   managers receive metadata/history without unrestricted narrative content.
 - Administrator self-deactivation and self-demotion are prevented.
@@ -252,9 +252,9 @@ predictions, health conclusions, or automated escalation resolutions.
 - Administrators with `narrative.assign` can assign, reassign, and revoke submitted narratives.
 - Assignment targets must be active accounts with the `reviewer` role.
 - A narrative has at most one active assignment, enforced by row locking and a partial unique index.
-- Reviewers can list and retrieve only their active assigned narratives.
+- Health Experts can list and retrieve only their active assigned narratives.
 - Assignment managers can inspect assignment metadata and review history without narrative content.
-- Reviewers can explicitly set `in_review` or `requires_escalation`.
+- Health Experts can explicitly set `in_review` or `requires_escalation`.
 - Submitted reviews are immutable API records with one of four neutral outcomes and optional evidence references.
 - Review history, assignment changes, status changes, escalation, and submissions are audited without raw notes or evidence in audit details.
 - Reassignment and revocation require a reason and preserve prior assignment history.
@@ -329,12 +329,12 @@ Administrator status/role changes, server-side authorization, last-active-admini
 **Requirement IDs:** FR-013 to FR-015  
 **Status:** Partially implemented.
 
-The neutral owner-scoped foundation is implemented. Final approved submitter roles, consent/provenance metadata, lifecycle states, organizational scope, reviewer access, and administrator research-data access are not approved or implemented.
+The neutral owner-scoped foundation is implemented. Final approved submitter roles, consent/provenance metadata, lifecycle states, organizational scope, Health Expert access, and administrator research-data access are not approved or implemented.
 
-### Requirement Area 4: Reviewer Workflow and Investigation
+### Requirement Area 4: Health Expert Workflow and Investigation
 
 **Requirement IDs:** FR-016 to FR-019  
-**Status:** Provisional backend implementation; formal supervisor and reviewer-qualification decisions remain unresolved.
+**Status:** Provisional backend implementation; formal supervisor and Health Expert-qualification decisions remain unresolved.
 
 The backend provides active assignment listing, assignment-level content access,
 four structured review outcomes, immutable evidence/history, reassignment,
@@ -377,12 +377,12 @@ No prediction, explanation, or mobile visualization exists.
 
 No approved source registry, content store, or communication workflow exists. The application is not a medical diagnosis or treatment recommendation system.
 
-### Requirement Area 10: Reviewer Feedback and Human Oversight
+### Requirement Area 10: Health Expert Feedback and Human Oversight
 
 **Requirement IDs:** FR-031 to FR-032  
-**Status:** Awaiting reviewer, ethics, and public-health decisions.
+**Status:** Awaiting Health Expert, ethics, and public-health decisions.
 
-No reviewer feedback, human override, approval, or escalation endpoint exists.
+No Health Expert feedback, human override, approval, or escalation endpoint exists.
 
 ### Requirement Area 11: Notifications
 
@@ -417,7 +417,7 @@ Health checks, API documentation, maintainable backend modules, data integrity f
 **Requirement IDs:** NFR-019 to NFR-022  
 **Status:** Blocked.
 
-These requirements depend on the dataset, ML task, ethics approval, language decisions, reviewer policy, data ownership, retention, deletion, and withdrawal procedures.
+These requirements depend on the dataset, ML task, ethics approval, language decisions, Health Expert policy, data ownership, retention, deletion, and withdrawal procedures.
 
 ## 5. What Has Not Been Done Yet
 
@@ -439,12 +439,12 @@ These requirements depend on the dataset, ML task, ethics approval, language dec
 - LIME has not been implemented or justified.
 - No explanation quality, stability, calibration, bias, or subgroup evaluation exists.
 
-### 5.3 Reviewer Workflow
+### 5.3 Health Expert Workflow
 
-- The provisional reviewer queue is limited to active assignments; no broader triage queue exists.
+- The provisional Health Expert queue is limited to active assignments; no broader triage queue exists.
 - Assignment, reassignment, revocation, status, review, evidence, and history endpoints exist.
 - Owner feedback, correction, model approval, notification, and automatic escalation resolution do not exist.
-- No formal reviewer qualification policy has been confirmed.
+- No formal Health Expert qualification policy has been confirmed.
 
 ### 5.4 Notifications
 
@@ -559,7 +559,7 @@ vaccine-ai/
 | Administrator routes | `backend/app/api/routes/admin.py` | Users, invitations, dashboard, audit events |
 | Health routes | `backend/app/api/routes/health.py` | Application and PostgreSQL health endpoints |
 | Narrative routes | `backend/app/api/routes/narratives.py` | Submit, list, retrieve, update, and history endpoints |
-| Review routes | `backend/app/api/routes/reviews.py` | Assignment, reviewer access, status, review, evidence, history, reassignment, and revocation endpoints |
+| Review routes | `backend/app/api/routes/reviews.py` | Assignment, Health Expert access, status, review, evidence, history, reassignment, and revocation endpoints |
 | Authentication dependencies | `backend/app/api/dependencies.py` | JWT validation, active-account checks, role checks |
 | Security settings | `backend/app/core/config.py` | Database, JWT, SMTP, rate-limit, and production settings |
 - Permission catalogue | `backend/app/core/permissions.py` | Permission definitions, implemented/future split, and role mapping |
@@ -577,7 +577,7 @@ vaccine-ai/
 | Authentication service | `backend/app/services/auth.py` | Account lifecycle and administrator protection |
 | Session service | `backend/app/services/sessions.py` | Refresh-token rotation and revocation |
 | Narrative service | `backend/app/services/narratives.py` | Ownership queries, row locking, revisions, rollback handling |
-| Review service | `backend/app/services/reviews.py` | Assignment lifecycle, active-reviewer scope, status transitions, reviews, evidence, and audit staging |
+| Review service | `backend/app/services/reviews.py` | Assignment lifecycle, active Health Expert scope, status transitions, reviews, evidence, and audit staging |
 | Audit service | `backend/app/services/audit.py` | Audit creation, sanitization, search |
 | Rate limiting | `backend/app/services/rate_limit.py` | Shared PostgreSQL fixed-window rate limiter |
 | Rate-limit cleanup | `backend/app/services/rate_limit_cleanup.py` | Bounded cleanup of expired buckets |
@@ -691,7 +691,7 @@ Emphasize that the module intentionally does not produce a prediction or fact-ch
 
 Open `backend/app/api/routes/reviews.py` and
 `tests/test_narrative_review_workflow.py`. Demonstrate assignment-manager
-metadata access, reviewer-only assigned content, explicit review status, neutral
+metadata access, Health Expert-only assigned content, explicit review status, neutral
 outcomes, evidence references, immutable history, reassignment, revocation, and
 escalation without automatic resolution.
 
@@ -706,7 +706,7 @@ Show the narrative and review migrations and the current Alembic head. Explain t
 ### Demonstration 7: Show What Remains
 
 Open the requirements gap analysis and decision register. Explain that formal
-reviewer qualification, production escalation policy, mobile framework, dataset,
+Health Expert qualification, production escalation policy, mobile framework, dataset,
 ML task, XAI, public-health sources, consent, and retention policies require
 evidence or supervisor approval.
 
@@ -715,7 +715,7 @@ evidence or supervisor approval.
 The dataset-independent backend foundation is ready for the next phase of dataset acquisition and assessment. It is also ready to receive a future approved ML integration contract after the task, labels, input schema, and safety requirements are known.
 
 The application is not ready for operational ML/XAI deployment or production
-human-review use. The dataset, model task, formal reviewer qualification,
+human-review use. The dataset, model task, formal Health Expert qualification,
 approved health sources, ethics controls, language scope, and mobile framework
 remain unresolved. No prediction or explanation should be demonstrated as if it
 were already implemented.

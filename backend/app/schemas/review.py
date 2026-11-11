@@ -26,13 +26,13 @@ class ReviewPageQuery(BaseModel):
 
 
 class NarrativeAssignmentCreate(BaseModel):
-    reviewer_id: UUID = Field(description="Active reviewer receiving the assignment.")
+    reviewer_id: UUID = Field(description="Active Health Expert receiving the assignment.")
 
     model_config = ConfigDict(extra="forbid")
 
 
 class NarrativeAssignmentReassign(BaseModel):
-    reviewer_id: UUID = Field(description="Active reviewer receiving the reassignment.")
+    reviewer_id: UUID = Field(description="Active Health Expert receiving the reassignment.")
     reason: str = Field(
         min_length=1,
         max_length=2000,

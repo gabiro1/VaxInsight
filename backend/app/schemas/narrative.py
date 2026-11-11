@@ -88,7 +88,7 @@ class NarrativeResponse(BaseModel):
         default=None,
         description=(
             "Status-only metadata for the owner's active review assignment. "
-            "Internal notes, outcomes, evidence, and reviewer history are excluded."
+            "Internal notes, outcomes, evidence, and Health Expert history are excluded."
         ),
     )
     version: int = Field(ge=1, description="Current narrative revision number.")

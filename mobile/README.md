@@ -41,15 +41,15 @@ The welcome photograph is currently loaded from Unsplash as
 approved/licensed project photography before production release; attribution is
 recorded in `assets/ATTRIBUTION.md`.
 
-The app does not invent ML output, medical conclusions, reviewer data, or role
+The app does not invent ML output, medical conclusions, Health Expert data, or role
 capabilities. Authenticated content is gated by the backend session and role.
 
 ## Supported Workflows
 
 - Public auth: registration, sign-in, password reset, email verification, and invitation acceptance.
 - Account: email-change request, verification resend, password change, session expiry recovery, and confirmed logout.
-- Owner narratives: create, list, detail, edit, and revision history for `community_member`, `chw`, and `reviewer` accounts.
-- Reviewer workflow: assigned queue, `in_review` transition, evidence-backed review submission, escalation, and review history.
+- Owner narratives: create, list, detail, edit, and revision history for `community_member` and `chw` accounts; Health Experts remain assignment-scoped.
+- Health Expert workflow: assigned queue, `in_review` transition, evidence-backed review submission, escalation, and review history.
 - Administrator workspace: dashboard, user directory, account role/status changes, staff invitations, invitation revocation, audit log, role permissions, permission catalogue, own narrative workspace, and source-backed vaccine-content publishing.
 
 Password-reset and invitation links use the `vaxinsight://` scheme. The invitation

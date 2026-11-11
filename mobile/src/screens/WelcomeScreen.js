@@ -23,15 +23,7 @@ export function WelcomeScreen({ navigation }) {
       <StatusBar style="light" />
       <CinematicHero
         accentTagline={t.heroTaglineAccent}
-        badgeOne={t.heroBadgeOne}
-        badgeOneCaption={t.heroBadgeOneCaption}
-        badgeTwo={t.heroBadgeTwo}
-        badgeTwoCaption={t.heroBadgeTwoCaption}
-        cardDescription={t.heroDescription}
-        cardHeading={t.heroCardHeading}
         eyebrow={t.heroEyebrow}
-        metricLabel={t.heroMetricLabel}
-        metricValue={t.heroMetricValue}
         onContinue={continueToAuth}
         renderActions={({ onContinue }) => (
           <View style={[styles.bottomContent, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
@@ -44,8 +36,6 @@ export function WelcomeScreen({ navigation }) {
             </View>
           </View>
         )}
-        secureLabel={t.heroSecureLabel}
-        phoneToday={t.heroPhoneToday}
         tagline={t.heroTaglinePrimary}
         topContent={(
           <View style={[styles.topRow, { paddingTop: Math.max(insets.top, spacing.md) }]}>

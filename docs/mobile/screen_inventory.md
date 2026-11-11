@@ -69,18 +69,20 @@ Status meanings:
 | Narrative details/history/revision details | EXISTING | `NarrativeDetailScreen` and `NarrativeHistoryScreen` use the owner-scoped routes. |
 | Edit narrative | EXISTING | `NarrativeComposerScreen` uses `PATCH /api/v1/narratives/{id}` while content remains submitted; active review assignment conflicts return `409` and preserve the form. |
 | Narrative not found/access denied/conflict | EXISTING | Detail/editor map API errors and preserve recoverable form content. |
-| Under review/assigned/completed/escalated labels | INCOMPLETE | CHW Home shows status-only `pending`, `in_review`, `reviewed`, and `requires_escalation` metadata from the personal dashboard; internal review notes, outcomes, and evidence remain unavailable pending policy. |
+| Under review/assigned/completed/escalated labels | EXISTING | CHW Home and owner narrative screens show status-only `pending`, `in_review`, `reviewed`, and `requires_escalation` metadata from the personal dashboard; internal review notes, outcomes, and evidence remain unavailable pending policy. |
 | CHW-specific dashboard | EXISTING | `HomeScreen` uses `GET /api/v1/dashboard/summary` for owned narrative counts and recent status-only records. |
-| CHW access-restricted state | EXISTING | Backend permissions remain authoritative; CHWs receive no reviewer, assignment-manager, administrator, or audit access. |
+| CHW access-restricted state | EXISTING | Backend permissions remain authoritative; CHWs receive no Health Expert, assignment-manager, administrator, or audit access. |
 | My questions | EXISTING | `QuestionListScreen` is reachable from CHW/community bottom navigation and uses owner-scoped `GET /api/v1/questions`. |
 | Ask question and unavailable analysis | EXISTING | `QuestionComposerScreen` uses `POST /api/v1/questions`; the explicit unavailable-analysis state remains visible when no approved provider exists. |
 | Question detail/professional response | EXISTING | `QuestionDetailScreen` renders owner-safe analysis and any published professional response. |
+| Resources hub | EXISTING | `ResourcesScreen` links published vaccine information, CHW questions, and an honest empty learning-resource state. |
+| Vaccine article detail/source link | EXISTING | `VaccineArticleDetailScreen` renders the published detail contract and opens the backend-provided original source URL. |
 
-## D. Reviewer
+## D. Health Expert
 
 | Workflow | Status | Current evidence or dependency |
 |---|---|---|
-| Reviewer dashboard | EXISTING | `ReviewQueueScreen` is role-gated to reviewers and uses active assignments. |
+| Health Expert dashboard | EXISTING | `ReviewQueueScreen` is role-gated to Health Experts and uses active assignments. |
 | Assigned list/loading/empty/failure | EXISTING | Queue uses `GET /api/v1/reviews/assignments` with refresh, empty, and retry states. |
 | Assigned narrative details | EXISTING | `ReviewDetailScreen` uses active-assignment detail and displays only returned narrative content. |
 | Assignment information/revoked/unavailable | EXISTING | 404/403/409 responses remain recoverable through error/retry states. |
@@ -88,7 +90,7 @@ Status meanings:
 | Review decision/validation/submission | EXISTING | Status transition to `in_review` and review submission use the existing endpoints and enums. |
 | Review success/failure/conflict | EXISTING | Form values remain in memory on failure; API status mapping handles recovery copy. |
 | Review history/empty/loading failure | EXISTING | `ReviewHistoryScreen` uses the assignment history endpoint. |
-| Escalation confirmation/success/failure | EXISTING | Reviewer can submit a required escalation reason from pending or in-review states. |
+| Escalation confirmation/success/failure | EXISTING | Health Experts can submit a required escalation reason from pending or in-review states. |
 | Review access denied/service unavailable | EXISTING | Permission, stale assignment, and service failures use shared error recovery. |
 
 ## E. Administrator
@@ -101,14 +103,14 @@ Status meanings:
 | User account details | EXISTING | `AdminUserDetailScreen` displays sanitized account metadata and effective permissions without credentials. |
 | User role management | EXISTING | Role changes use the protected backend route, confirmation, self-demotion protection, success, conflict, and retry states. |
 | User status management | EXISTING | Status changes use the protected backend route, confirmation, self-deactivation protection, session-revocation feedback, and retry states. |
-| Staff invitation creation | EXISTING | `AdminInviteScreen` sends CHW, reviewer, or administrator invitations with validation and delivery-expiry feedback. |
+| Staff invitation creation | EXISTING | `AdminInviteScreen` sends CHW, Health Expert, or administrator invitations with validation and delivery-expiry feedback. |
 | Invitation directory/details/revocation | EXISTING | `AdminInvitationsScreen` and `AdminInvitationDetailScreen` support filters, pagination, sanitized metadata, pending-only revoke confirmation, and recovery states. |
 | Audit log | EXISTING | `AdminAuditScreen` supports action/outcome filters, pagination, expandable sanitized details, empty state, and retry state. |
 | Role and permission inspection | EXISTING | `AdminRolesScreen`, `AdminRoleDetailScreen`, and `AdminPermissionsScreen` display static role mappings and reserved capabilities. |
 | Vaccine-content management | EXISTING | `AdminVaccineContentScreen` creates draft or published source-backed content and lists published content; validation, success, empty, and retry states are included. |
 | Administrator-owned narratives | EXISTING | Administrator accounts now see the owner-scoped narrative workspace granted by the backend role mapping. |
 | Mobile narrative assignment management | OPTIONAL | Backend supports `narrative.assign`; mobile administration requires explicit product approval. |
-| Assignment/reviewer selection/conflict/revocation | OPTIONAL | Do not add until mobile administration is approved. |
+| Assignment/Health Expert selection/conflict/revocation | OPTIONAL | Do not add until mobile administration is approved. |
 | Administrator access denied | EXISTING | `AdminAccessDeniedScreen` and per-screen guards provide a recoverable error state; backend permission checks remain authoritative. |
 
 ## F. ML And Explainable AI
@@ -124,7 +126,7 @@ when this area is eventually reached.
 | Workflow | Status | Current evidence or dependency |
 |---|---|---|
 | Profile display | EXISTING | `AccountScreen` displays name, email, role, and lifecycle status. |
-| Edit profile/email change | EXISTING | `AccountScreen` edits the full name without ending the session and calls `PATCH /auth/me`; email-change verification remains email-driven. |
+| Edit profile/email change | EXISTING | `AccountScreen` edits the full name without ending the session and calls `PATCH /auth/me`; email changes enter the explicit verification route after the server invalidates the old session. |
 | Change password | EXISTING | `AccountScreen` calls `POST /auth/password/change` and clears fields after success. |
 | Language settings | EXISTING | Welcome selector persists the selected language. A dedicated settings route is not needed yet. |
 | Account status | EXISTING | Home displays current status from the authenticated profile. |
@@ -134,10 +136,10 @@ when this area is eventually reached.
 
 | State family | Status | Current evidence or dependency |
 |---|---|---|
-| Network/offline/timeout/server failure | EXISTING | Shared API error mapping and reusable `OfflineState`/`ErrorState` primitives are available. |
+| Network/offline/timeout/server failure | EXISTING | Shared API error mapping, a 15-second request abort timeout, and reusable `OfflineState`/`ErrorState` primitives are available. |
 | Unauthorized/forbidden/not found/conflict | EXISTING | `ApiError` status mapping provides localized 403/404/409/429/503 copy; authenticated 401s use session recovery. |
 | Loading/submitting/duplicate prevention | EXISTING | Auth forms disable actions and show activity indicators; broader workflow coverage is pending. |
 | Success/empty/error/retry primitives | EXISTING | `InlineNotice`, `FullScreenLoader`, `EmptyState`, `ErrorState`, and `OfflineState` are implemented. |
 | Input focus/filled/invalid/password toggle | EXISTING | Shared input primitives implement labels, focus-compatible native inputs, password visibility, and inline errors. |
-| Unsaved changes/recovery after failure | MISSING | Required when narrative/profile/review forms are added. |
-| Confirmation dialogs/bottom sheets | EXISTING | Logout confirmation uses the platform alert; review confirmations remain pending with reviewer screens. |
+| Unsaved changes/recovery after failure | INCOMPLETE | Narrative/question forms preserve in-memory content after recoverable failures; persistent drafts and a global unsaved-change guard are not implemented. |
+| Confirmation dialogs/bottom sheets | EXISTING | Logout confirmation uses the platform alert; review confirmations remain pending with Health Expert screens. |

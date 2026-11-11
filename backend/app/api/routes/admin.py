@@ -284,7 +284,7 @@ def get_user_directory_query(
     ),
     role: UserRole | None = Query(
         default=None,
-        description="Filter by role: chw, reviewer, or administrator.",
+        description="Filter by role: chw, reviewer (Health Expert), or administrator.",
     ),
     status: AccountStatus | None = Query(
         default=None,
@@ -346,7 +346,7 @@ def get_invitation_directory_query(
     ),
     role: UserRole | None = Query(
         default=None,
-        description="Filter by invited role: chw, reviewer, or administrator.",
+        description="Filter by invited role: chw, reviewer (Health Expert), or administrator.",
     ),
     status: str | None = Query(
         default=None,

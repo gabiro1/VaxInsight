@@ -118,8 +118,8 @@ def _is_assignment_manager(user: User) -> bool:
     response_description="The created narrative assignment without narrative content.",
     summary="Assign a narrative for review",
     description=(
-        "Assign a submitted narrative to one active reviewer. Assignment managers "
-        "receive metadata only; the reviewer receives content through the assigned "
+        "Assign a submitted narrative to one active Health Expert. Assignment managers "
+        "receive metadata only; the Health Expert receives content through the assigned "
         "review endpoint."
     ),
     responses=documented_responses(
@@ -147,7 +147,7 @@ def assign_narrative(
     except ReviewerNotEligible:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail="Reviewer is not eligible for assignment",
+            detail="Health Expert is not eligible for assignment",
         ) from None
     except AssignmentStateConflict as error:
         raise HTTPException(
@@ -171,7 +171,7 @@ def assign_narrative(
     summary="Reassign a narrative",
     description=(
         "Revoke the active assignment, preserve its history, and create a new "
-        "pending assignment for an eligible reviewer."
+        "pending assignment for an eligible Health Expert."
     ),
     responses=documented_responses(
         status.HTTP_401_UNAUTHORIZED,
@@ -199,7 +199,7 @@ def reassign_narrative(
     except ReviewerNotEligible:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail="Reviewer is not eligible for assignment",
+            detail="Health Expert is not eligible for assignment",
         ) from None
     except AssignmentStateConflict as error:
         raise HTTPException(
@@ -222,7 +222,7 @@ def reassign_narrative(
     response_description="The revoked assignment without narrative content.",
     summary="Revoke a narrative assignment",
     description=(
-        "Revoke the active reviewer assignment with a required reason. Existing "
+        "Revoke the active Health Expert assignment with a required reason. Existing "
         "assignment and review history remains available to authorized managers."
     ),
     responses=documented_responses(
@@ -259,7 +259,7 @@ def revoke_narrative_assignment(
     response_description="A page of assignment metadata or assigned narratives.",
     summary="List review assignments",
     description=(
-        "Reviewers receive only their active assignments with narrative content. "
+        "Health Experts receive only their active assignments with narrative content. "
         "Assignment managers receive active assignment metadata without content."
     ),
     responses=documented_responses(
@@ -301,10 +301,10 @@ def list_review_assignments(
     "/reviews/assignments/{assignment_id}",
     response_model=NarrativeAssignmentResponse,
     status_code=status.HTTP_200_OK,
-    response_description="Assignment metadata and, for the reviewer, assigned content.",
+    response_description="Assignment metadata and, for the Health Expert, assigned content.",
     summary="Get a review assignment",
     description=(
-        "Return assigned narrative content only to its active reviewer. Assignment "
+        "Return assigned narrative content only to its active Health Expert. Assignment "
         "managers receive assignment metadata without narrative content."
     ),
     responses=documented_responses(
@@ -479,7 +479,7 @@ def submit_narrative_review(
     response_description="Immutable review history and evidence references.",
     summary="List review history",
     description=(
-        "Return immutable review records for the active assigned reviewer or an "
+        "Return immutable review records for the active assigned Health Expert or an "
         "authorized assignment manager. Narrative owners cannot access this history."
     ),
     responses=documented_responses(

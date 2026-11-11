@@ -3,7 +3,7 @@
 ## Status
 
 This document records the fine-grained authorization implementation for the
-current backend scope. Reviewer assignment and human review are implemented as a
+current backend scope. Health Expert assignment and human review are implemented as a
 minimal workflow. Analysis, dataset, model, and health-communication workflows
 remain outside the approved scope.
 
@@ -17,11 +17,11 @@ models, migrations, services, schemas, tests, and project requirements.
 - Administrator routes used a reusable administrator-only role dependency.
 - Narrative routes required authentication and enforced owner scope in the
   narrative service, but had no action-level permission checks.
-- No permission catalogue, role-permission mapping, assignment entity, reviewer
+- No permission catalogue, role-permission mapping, assignment entity, Health Expert
   workflow, or custom-role API existed before the permission foundation was added.
 - Account administration and audit access were separate from narrative content;
   administrator access to other users' narratives was already denied.
-- Existing requirements leave CHW/reviewer assignment, review authority, dataset
+- Existing requirements leave CHW/Health Expert assignment, review authority, dataset
   access, model access, and administrator research-data access unresolved.
 
 The implementation therefore uses a static role-to-permission configuration and
@@ -45,7 +45,7 @@ Permission definitions and the explicit role mapping are centralized in
 - `require_any_permissions` supports an explicit any-permission policy for future
   routes.
 - Review routes use `narrative.assign` for assignment managers and
-  `narrative.read.assigned`/`narrative.review` for assigned reviewers. Resource
+  `narrative.read.assigned`/`narrative.review` for assigned Health Experts. Resource
   checks remain in the review service and do not rely on a role alone.
 - Existing `require_roles` remains available for compatibility, but protected
   role-sensitive routes use permission dependencies.
@@ -90,7 +90,7 @@ name does not create the corresponding business functionality.
 | Role | Implemented permissions | Boundary rationale |
 |---|---|---|
 | `community_member` | `vaccine_content.read`, `narrative.create`, `narrative.read.own`, `narrative.update.own`, `question.create`, `question.read.own`, `vaccine_analysis.request`, `vaccine_analysis.read` | Own narrative/question workflows and published content only; analysis remains an explicit unavailable boundary when no provider is configured. |
-| `chw` | `vaccine_content.read`, `narrative.create`, `narrative.read.own`, `narrative.update.own`, `question.create`, `question.read.own`, `vaccine_analysis.request`, `vaccine_analysis.read` | Own narrative/question workflows and published content only; no assigned-record, reviewer, administrator, audit, or participant-data access is inferred. |
+| `chw` | `vaccine_content.read`, `narrative.create`, `narrative.read.own`, `narrative.update.own`, `question.create`, `question.read.own`, `vaccine_analysis.request`, `vaccine_analysis.read` | Own narrative/question workflows and published content only; no assigned-record, Health Expert, administrator, audit, or participant-data access is inferred. |
 | `reviewer` | `vaccine_content.read`, `narrative.create`, `narrative.read.own`, `narrative.update.own`, `narrative.read.assigned`, `narrative.review`, `question.create`, `question.read.own`, `question.review`, `vaccine_analysis.request`, `vaccine_analysis.read` | Assigned-record access is still limited to active assignments; the role alone does not grant access to another user's narrative. |
 | `administrator` | `user.read`, `user.manage`, `role.read`, `role.manage`, `invitation.manage`, `narrative.assign`, `narrative.create`, `narrative.read.own`, `narrative.update.own`, `vaccine_content.read`, `vaccine_content.manage`, `audit.read` | Can manage accounts, content, assignment metadata, and audit records but does not receive unrestricted narrative content through the review API. |
 
@@ -133,13 +133,13 @@ Existing endpoints now use these permissions:
 | Narrative list, detail, and history | `narrative.read.own` plus owner query scope |
 | Narrative update | `narrative.update.own` plus owner query scope |
 | Narrative assignment management | `narrative.assign` plus submitted-narrative and eligible-reviewer checks |
-| Assigned narrative list/detail | `narrative.read.assigned` plus active reviewer-assignment scope |
-| Review status and history | `narrative.read.assigned` for reviewers or `narrative.assign` for assignment managers |
+| Assigned narrative list/detail | `narrative.read.assigned` plus active Health Expert-assignment scope |
+| Review status and history | `narrative.read.assigned` for Health Experts or `narrative.assign` for assignment managers |
 | Review submission | `narrative.review` plus active reviewer-assignment scope |
 | Personal dashboard summary (`GET /api/v1/dashboard/summary`) | `narrative.read.own` plus authenticated owner scope; returns only owned narrative counts and status-only recent records. |
 | Published vaccine content (`GET /api/v1/vaccine-content`, `GET /api/v1/vaccine-content/{id}`) | `vaccine_content.read`; published records only. |
 | Owned questions and analysis | `question.create`, `question.read.own`, `vaccine_analysis.request`, `vaccine_analysis.read`; owner scope and shared rate-limit boundary. |
-| Question review queue and response | `question.review`; reviewer-only queue and professional-response routes remain separate from owner access. |
+| Question review queue and response | `question.review`; Health Expert-only queue and professional-response routes remain separate from owner access. |
 
 New protected read-only administrator inspection endpoints are available:
 
@@ -170,7 +170,7 @@ operations; it does not add artificial permissions to the authentication system.
   assignment per narrative. Reassignment and revocation retain the prior row and
   require a reason.
 - `narrative_reviews` and `review_evidence_references` are append-only through the
-  API. Review records are visible to the active assigned reviewer and assignment
+   API. Review records are visible to the active assigned Health Expert and assignment
   managers, not narrative owners.
 - Administrator assignment permission does not bypass narrative ownership or
   return narrative content through assignment-management responses.
@@ -198,7 +198,7 @@ The implementation verifies:
 
 - Anonymous callers receive `401` on protected permission and domain routes.
 - Authenticated roles without a required permission receive `403`.
-- Cross-user narrative access remains `404`, including for CHWs, reviewers, and
+- Cross-user narrative access remains `404`, including for CHWs, Health Experts, and
   administrators without an assignment/ownership relationship.
 - Inactive accounts have no effective permissions and cannot authenticate.
 - Role changes remain administrator-controlled and retain self-demotion and
@@ -214,10 +214,10 @@ The implementation verifies:
 - Review audit events record assignment, status, escalation, and outcome metadata
   without storing narrative content, review notes, evidence text, or reassignment
   reasons in audit details.
-- Reviewer access is checked against the current active assignment and current
+- Health Expert access is checked against the current active assignment and current
   account state, so revocation or role/status changes take effect at request time.
 - Personal dashboard responses are marked `no-store` and return status-only
-  review metadata; reviewer notes, outcomes, evidence, and other users' records
+  review metadata; Health Expert notes, outcomes, evidence, and other users' records
   are not serialized.
 - Question creation and repeat analysis requests use account-bound shared rate
   limits; the question API has no fabricated analysis fallback.
@@ -238,11 +238,11 @@ OpenAPI, concurrency, and security tests remain in the suite.
 
 Current CHW-extension verification:
 
-- `python -m pytest tests/test_dashboard_api.py tests/test_supervisor_workflow.py tests/test_narrative_review_workflow.py tests/test_openapi_documentation.py -q`: `28 passed`.
+- `python -m pytest tests/test_dashboard_api.py tests/test_supervisor_workflow.py tests/test_narrative_review_workflow.py tests/test_openapi_documentation.py tests/test_database_isolation.py -q`: `28 passed`.
 - `python -m ruff check backend tests`: all checks passed.
 - `python -m alembic check`: no new upgrade operations detected.
-- Mobile theme tests: `4 passed`; Babel compilation passed for six changed modules; Android Expo export passed.
-- A full `python -m pytest tests/ -q -ra` run reached `255 passed` and six failures in pre-existing last-active-administrator tests. The configured development database contains one real active administrator, so those tests' temporary administrator is not the database-wide last administrator. Re-run them against an isolated test database before treating the full suite as clean.
+- Mobile Node contract/theme tests: `9 passed`; Android Expo export passed.
+- A full `python -m pytest tests/ -q -ra` run against the isolated `vaccine_ai_test` database passed: `268 passed`. The development database `vaccine_ai` was not modified.
 - Repository-wide Ruff formatting still reports pre-existing drift in unrelated files; the touched dashboard schema/service were formatted, while the existing `tests/test_supervisor_workflow.py` drift remains.
 
 ## Known Limitations and Unresolved Decisions

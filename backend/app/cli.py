@@ -106,7 +106,7 @@ def main() -> None:
     admin_parser.add_argument("--email", required=True)
     staff_parser = subparsers.add_parser(
         "create-staff",
-        help="Provision an active, verified CHW or reviewer without email delivery",
+        help="Provision an active, verified CHW or Health Expert without email delivery",
     )
     staff_parser.add_argument("--email", required=True)
     staff_parser.add_argument("--full-name", default=None)

@@ -20,7 +20,7 @@ from app.database.database import Base
 
 
 class NarrativeStatus(str, Enum):
-    """Neutral lifecycle state available before reviewer workflow approval."""
+    """Neutral lifecycle state available before Health Expert workflow approval."""
 
     SUBMITTED = "submitted"
 

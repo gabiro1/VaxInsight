@@ -10,7 +10,7 @@ from app.models.review import ReviewStatus
 class RoleStatistics(BaseModel):
     community_member: int = Field(ge=0, description="Number of community accounts.")
     chw: int = Field(ge=0, description="Number of CHW accounts.")
-    reviewer: int = Field(ge=0, description="Number of reviewer accounts.")
+    reviewer: int = Field(ge=0, description="Number of Health Expert accounts.")
     administrator: int = Field(ge=0, description="Number of administrator accounts.")
     unassigned: int = Field(ge=0, description="Number of accounts without a role.")
 
@@ -81,7 +81,7 @@ class PersonalNarrativeSummary(BaseModel):
         default=None,
         description=(
             "Current status of the owner's active review assignment, without "
-            "reviewer notes, outcomes, or evidence."
+            "Health Expert notes, outcomes, or evidence."
         ),
     )
     version: int = Field(ge=1, description="Current narrative revision number.")

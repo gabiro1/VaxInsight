@@ -166,10 +166,10 @@ The following requirements use the current implementation as evidence where avai
 
 | ID | Requirement | Primary actor | Priority | Acceptance criteria | Source or justification | Status |
 |---|---|---|---|---|---|---|
-| FR-016 | The system shall provide reviewers with a queue of narratives according to approved assignment and workflow rules. | Reviewer | Must | The provisional queue lists active assignments with stable pagination, limits content to the assigned reviewer, and records assignment changes; ordering, filtering, and production policy remain subject to confirmation. | E-001, E-008, E-018 | Awaiting confirmation |
-| FR-017 | An authorized reviewer shall be able to inspect a narrative and its permitted provenance/context without unnecessary participant identifiers. | Reviewer | Must | The provisional assigned view returns narrative content and current status only to the active reviewer; assignment managers receive metadata without content. Final provenance, identity minimization, and access-logging policy remain subject to approval. | E-009, E-018 | Awaiting confirmation |
-| FR-018 | A reviewer shall be able to record an assessment, evidence reference, uncertainty, and structured feedback using approved labels. | Reviewer | Must | The provisional API records one of four neutral outcomes, optional notes, evidence references, reviewer attribution, timestamps, and immutable history. Formal labels, uncertainty, feedback, and qualification policy remain subject to approval. | E-001, E-003, E-018 | Awaiting confirmation |
-| FR-019 | The system shall record the narrative review workflow, including review, escalation, approval, rejection, correction, and history states selected by the supervisor. | Reviewer and system | Must | The provisional workflow authorizes assignment, `pending`, `in_review`, `reviewed`, and explicit `requires_escalation` transitions, with reassignment/revocation history and audit events. Approval, rejection, correction, notifications, and escalation resolution remain unimplemented pending confirmation. | E-018; provisional review implementation | Awaiting confirmation |
+| FR-016 | The system shall provide Health Experts with a queue of narratives according to approved assignment and workflow rules. | Health Expert | Must | The provisional queue lists active assignments with stable pagination, limits content to the assigned Health Expert, and records assignment changes; ordering, filtering, and production policy remain subject to confirmation. | E-001, E-008, E-018 | Awaiting confirmation |
+| FR-017 | An authorized Health Expert shall be able to inspect a narrative and its permitted provenance/context without unnecessary participant identifiers. | Health Expert | Must | The provisional assigned view returns narrative content and current status only to the active Health Expert; assignment managers receive metadata without content. Final provenance, identity minimization, and access-logging policy remain subject to approval. | E-009, E-018 | Awaiting confirmation |
+| FR-018 | A Health Expert shall be able to record an assessment, evidence reference, uncertainty, and structured feedback using approved labels. | Health Expert | Must | The provisional API records one of four neutral outcomes, optional notes, evidence references, Health Expert attribution, timestamps, and immutable history. Formal labels, uncertainty, feedback, and qualification policy remain subject to approval. | E-001, E-003, E-018 | Awaiting confirmation |
+| FR-019 | The system shall record the narrative review workflow, including review, escalation, approval, rejection, correction, and history states selected by the supervisor. | Health Expert and system | Must | The provisional workflow authorizes assignment, `pending`, `in_review`, `reviewed`, and explicit `requires_escalation` transitions, with reassignment/revocation history and audit events. Approval, rejection, correction, notifications, and escalation resolution remain unimplemented pending confirmation. | E-018; provisional review implementation | Awaiting confirmation |
 
 ## C5. Dataset and Analytical Data Management
 
@@ -190,8 +190,8 @@ The following requirements use the current implementation as evidence where avai
 
 | ID | Requirement | Primary actor | Priority | Acceptance criteria | Source or justification | Status |
 |---|---|---|---|---|---|---|
-| FR-025 | The system shall associate each explanation with the exact input, model version, prediction, and explanation method used. | Reviewer or authorized user | Must | A permitted user can see which model output is being explained; explanation generation is reproducible for the recorded version or the limitation is shown. | E-002, E-003, E-018 | Proposed |
-| FR-026 | The system should provide validated global model-behavior summaries when they are useful for the confirmed task and safe to disclose. | Reviewer, supervisor, or authorized analyst | Should | Global summaries identify the population and model version, include validation limitations, and do not expose sensitive features without approval. | E-002, E-014, E-018 | Proposed |
+| FR-025 | The system shall associate each explanation with the exact input, model version, prediction, and explanation method used. | Health Expert or authorized user | Must | A permitted user can see which model output is being explained; explanation generation is reproducible for the recorded version or the limitation is shown. | E-002, E-003, E-018 | Proposed |
+| FR-026 | The system should provide validated global model-behavior summaries when they are useful for the confirmed task and safe to disclose. | Health Expert, supervisor, or authorized analyst | Should | Global summaries identify the population and model version, include validation limitations, and do not expose sensitive features without approval. | E-002, E-014, E-018 | Proposed |
 | FR-027 | The system shall present explanations as model associations or feature contributions, not as causal proof, medical truth, or independent misinformation verification. | All users receiving an explanation | Must | UI and API wording separates prediction, explanation, verified health information, and human review; limitations are visible at the point of use. | E-004, E-018 | Awaiting confirmation |
 
 ## C8. Visualization and Interpretation
@@ -207,11 +207,11 @@ The following requirements use the current implementation as evidence where avai
 | FR-029 | The system shall display health communication content only from a supervisor-approved set of public-health sources and shall show source and currency information. | CHW, reviewer, or approved user | Must | Each displayed item identifies its source and review/update date; content cannot be presented as approved before source governance is defined. | E-001, E-004, E-018 | Awaiting confirmation |
 | FR-030 | The system shall clearly separate verified educational information from model predictions, explanations, and reviewer judgments, and shall provide an appropriate professional-care disclaimer. | All users | Must | The interface and API use distinct labels and provenance; uncertain or unsafe cases are escalated according to the approved workflow; the system does not provide diagnosis or treatment recommendations. | E-004, E-018 | Awaiting confirmation |
 
-## C10. Reviewer Feedback and Human Oversight
+## C10. Health Expert Feedback and Human Oversight
 
 | ID | Requirement | Primary actor | Priority | Acceptance criteria | Source or justification | Status |
 |---|---|---|---|---|---|---|
-| FR-031 | A reviewer shall be able to submit corrections, concerns, and feedback linked to the narrative, model output, or explanation. | Reviewer | Must | Feedback is attributable, versioned, access-controlled, auditable, and distinguishable from the model output; the feedback schema is approved before implementation. | E-001, E-003, E-018 | Awaiting confirmation |
+| FR-031 | A Health Expert shall be able to submit corrections, concerns, and feedback linked to the narrative, model output, or explanation. | Health Expert | Must | Feedback is attributable, versioned, access-controlled, auditable, and distinguishable from the model output; the feedback schema is approved before implementation. | E-001, E-003, E-018 | Awaiting confirmation |
 | FR-032 | The system shall support an approved human decision, override, or escalation path without silently replacing the original model output. | Qualified reviewer | Must | The final communication state identifies human and model contributions separately, records the reason and reviewer, and prevents an unreviewed model output from being represented as verified fact. | E-004, E-018 | Awaiting confirmation |
 
 ## C11. Notifications and Communication
@@ -267,7 +267,7 @@ No numerical performance, availability, scale, usability, or evaluation target i
 `administrator`, `chw`, and `reviewer`. `backend/app/api/dependencies.py` enforces
 active-account authentication and server-side permission checks. The current
 administrator routes use explicit permissions derived from the administrator
-role. Reviewer-specific assignment and review routes exist as a provisional
+role. Health Expert-specific assignment and review routes exist as a provisional
 workflow; no CHW-specific assigned-record route exists.
 
 ### Permission-layer implementation update
@@ -284,7 +284,7 @@ implementation assessment and final matrix.
 
 Legend: **Implemented** means the current backend supports the permission; **Proposed** means the permission is a future requirement; **Confirm** means the permission must be decided before implementation; **No evidence** means no permission is currently granted by the application.
 
-| Capability | Administrator | CHW | Reviewer | Evidence and decision note |
+| Capability | Administrator | CHW | Health Expert | Evidence and decision note |
 |---|---|---|---|---|
 | Register as a community member | Self-registration with full name, email, password, and password confirmation | Self-registration with server-assigned `community_member` role | Invitation-only onboarding with `chw`, `reviewer`, or `administrator` role | FR-001; public registration cannot select or obtain a staff role. |
 | Receive and accept invitation | Implemented | Implemented as supported role value | Implemented as supported role value | FR-002 and FR-003; invitation acceptance creates the invited role. |
@@ -391,7 +391,7 @@ Data assessment must be evidence-based and must report provenance, permissions, 
 | Machine Learning | Produce a prediction for a confirmed task using approved data and a versioned model. | It must not be described as diagnosing a person, recommending treatment, or independently verifying public-health truth. |
 | SHAP | Attribute model output to input features according to the selected model/explainer assumptions and provide a model-linked explanation. | SHAP does not prove causation, medical truth, or that a narrative is misinformation. |
 | LIME | May be evaluated only if a supervisor-approved justification shows that it adds value for the selected model/task and is communicated with its limitations. | The dependency declaration does not approve LIME or require it in the final system. |
-| Human reviewers | Assess context, source, safety, uncertainty, and communication; correct, approve, reject, or escalate according to policy. | Reviewers must not be replaced by a model, and their judgments must remain distinguishable from model output. |
+| Human Health Experts | Assess context, source, safety, uncertainty, and communication; correct, approve, reject, or escalate according to policy. | Health Experts must not be replaced by a model, and their judgments must remain distinguishable from model output. |
 | Health communication components | Present approved public-health information with source, date, audience, and safe wording. | They must not convert a prediction or explanation into diagnosis, treatment advice, or an unsupported claim of truth. |
 
 ## AI Risks Requiring Controls
@@ -420,7 +420,7 @@ Before any operational ML feature is released, the project must have an approved
 | Right to withdraw | Where applicable, participants shall be able to withdraw according to an approved procedure, with clear limits for derived data and immutable audit obligations. | No policy exists; ethics and data-owner decision required. |
 | Retention and deletion | Each data class shall have an approved owner, retention period, deletion behavior, and legal/ethical basis. | No policy exists; blocked. |
 | Ethical approval | Data collection, secondary use, sensitive health information, model use, and user evaluation shall follow the applicable institutional approval process. | No approval document is present; blocked. |
-| Human oversight | High-impact or uncertain communication shall be reviewed or escalated by an appropriately qualified person. | Reviewer role exists only as an account value; workflow is absent. |
+| Human oversight | High-impact or uncertain communication shall be reviewed or escalated by an appropriately qualified person. | Health Expert role exists only as an account value; workflow is absent. |
 | Transparency | Users shall be told when they see a model output, explanation, verified source content, or human judgment. | Required by this specification; no domain UI exists. |
 | Incident handling | The project shall define how harmful output, privacy incidents, incorrect source content, and model failures are reported, triaged, corrected, and audited. | No incident procedure is present; supervisor/policy approval required. |
 
@@ -438,4 +438,4 @@ The project must not collect new participant narratives, deploy AI communication
 | XAI evaluation | Explanation faithfulness, stability, comprehensibility, version linkage, and non-causal wording. |
 | Security/privacy review | Threat modeling, access control, secrets, transport/storage, retention, consent, and auditability. |
 | Usability/accessibility evaluation | Representative user tasks, comprehension of uncertainty, accessibility checks, language review, and Android device testing. |
-| Human/ethics review | Reviewer qualification, consent, public-health source approval, safe communication, and withdrawal/incident procedures. |
+| Human/ethics review | Health Expert qualification, consent, public-health source approval, safe communication, and withdrawal/incident procedures. |

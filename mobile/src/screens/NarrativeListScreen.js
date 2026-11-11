@@ -21,7 +21,7 @@ export function NarrativeListScreen({ navigation }) {
   const { t, language } = useLanguage();
   const { colors } = useTheme();
   const styles = createStyles(colors);
-  const { authenticatedRequest } = useAuth();
+  const { authenticatedRequest, user } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -31,6 +31,7 @@ export function NarrativeListScreen({ navigation }) {
 
   const load = useCallback(
     async (pageNumber = 1, isRefresh = false) => {
+      if (user?.role === "reviewer") return;
       if (pageNumber === 1 && isRefresh) setRefreshing(true);
       else if (pageNumber === 1) setLoading(true);
       else setLoadingMore(true);
@@ -61,12 +62,25 @@ export function NarrativeListScreen({ navigation }) {
         setRefreshing(false);
       }
     },
-    [authenticatedRequest, t],
+    [authenticatedRequest, t, user?.role],
   );
 
   useEffect(() => {
     load();
   }, [load]);
+
+  if (user?.role === "reviewer") {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ErrorState
+          actionLabel={t.assignments}
+          description={t.reviewerAssignmentsOnlyDescription}
+          onRetry={() => navigation.navigate("ReviewQueue")}
+          title={t.reviewerAssignmentsOnlyTitle}
+        />
+      </SafeAreaView>
+    );
+  }
 
   if (loading && !items.length) return <FullScreenLoader label={t.loading} />;
 

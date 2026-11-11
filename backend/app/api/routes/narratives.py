@@ -152,7 +152,7 @@ def list_narratives(
     summary="List narrative history",
     description=(
         "Return immutable content revisions for a narrative owned by the "
-        "authenticated account. Reviewer and administrator access is not implied."
+        "authenticated account. Health Expert and administrator access is not implied."
     ),
     responses=documented_responses(
         status.HTTP_401_UNAUTHORIZED,

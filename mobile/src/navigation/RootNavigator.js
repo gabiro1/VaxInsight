@@ -51,13 +51,21 @@ const Stack = createNativeStackNavigator();
 
 function withAuthenticatedShell(ScreenComponent) {
   return function AuthenticatedShell(props) {
-    const routeName = props.route?.name;
     const { user } = useAuth();
-    const hideQuestionTabsForChw = user?.role === "chw" && routeName === "QuestionList";
+    const routeName = props.route?.name;
+    const primaryRoute = user?.role === "reviewer" ? "ReviewQueue" : "NarrativeList";
+    const questionRoute = user?.role === "reviewer" ? "QuestionReviewQueue" : null;
     return (
       <View style={{ flex: 1 }}>
         <ScreenComponent {...props} />
-        {isMainRoute(routeName) && !hideQuestionTabsForChw ? <BottomTabBar navigation={props.navigation} routeName={routeName} /> : null}
+        {isMainRoute(routeName, primaryRoute, questionRoute) ? (
+          <BottomTabBar
+            navigation={props.navigation}
+            primaryRoute={primaryRoute}
+            questionRoute={questionRoute}
+            routeName={routeName}
+          />
+        ) : null}
       </View>
     );
   };
@@ -73,6 +81,7 @@ const AuthenticatedAdminDashboardScreen = withAuthenticatedShell(AdminDashboardS
 const AuthenticatedNarrativeListScreen = withAuthenticatedShell(NarrativeListScreen);
 const AuthenticatedReviewQueueScreen = withAuthenticatedShell(ReviewQueueScreen);
 const AuthenticatedQuestionListScreen = withAuthenticatedShell(QuestionListScreen);
+const AuthenticatedQuestionReviewQueueScreen = withAuthenticatedShell(QuestionReviewQueueScreen);
 
 const linking = {
   prefixes: ["vaxinsight://", "exp://"],
@@ -112,7 +121,7 @@ function LoadingScreen() {
 }
 
 export function RootNavigator() {
-  const { session, sessionExpired, ready } = useAuth();
+  const { session, sessionExpired, pendingEmailVerification, ready } = useAuth();
   const { colors, isDark } = useTheme();
 
   if (!ready) return <LoadingScreen />;
@@ -122,7 +131,7 @@ export function RootNavigator() {
       <StatusBar style={isDark ? "light" : "dark"} />
       <NavigationContainer linking={linking} theme={getNavigationTheme(colors)}>
       <Stack.Navigator
-        key={sessionExpired ? "expired" : session ? "authenticated" : "guest"}
+        key={sessionExpired ? "expired" : pendingEmailVerification ? "email-verification" : session ? "authenticated" : "guest"}
         screenOptions={{
           headerShown: false,
           animation: "slide_from_right",
@@ -132,6 +141,12 @@ export function RootNavigator() {
       >
         {sessionExpired ? (
           <Stack.Screen name="SessionExpired" component={SessionExpiredScreen} />
+        ) : pendingEmailVerification ? (
+          <Stack.Screen
+            initialParams={{ email: pendingEmailVerification }}
+            name="VerifyEmail"
+            component={VerifyEmailScreen}
+          />
         ) : session ? (
         <>
             <Stack.Screen name="Home" component={AuthenticatedHomeScreen} />
@@ -169,7 +184,7 @@ export function RootNavigator() {
             <Stack.Screen name="QuestionDetail" component={QuestionDetailScreen} />
             <Stack.Screen
               name="QuestionReviewQueue"
-              component={QuestionReviewQueueScreen}
+              component={AuthenticatedQuestionReviewQueueScreen}
             />
             <Stack.Screen
               name="QuestionReviewDetail"
@@ -186,7 +201,9 @@ export function RootNavigator() {
           </>
         )}
         <Stack.Screen name="PasswordResetConfirm" component={PasswordResetConfirmScreen} />
-        <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
+        {!session && !pendingEmailVerification ? (
+          <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
+        ) : null}
         <Stack.Screen name="InvitationAccept" component={InvitationAcceptScreen} />
       </Stack.Navigator>
       </NavigationContainer>

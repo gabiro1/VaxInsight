@@ -80,10 +80,10 @@ the dataset is received and examined.
 
 The backend supports self-registration for community members and invitation-based
 onboarding for staff. Public registration never grants a staff role: CHWs,
-reviewers, and administrators must be invited by an administrator.
+Health Experts, and administrators must be invited by an administrator.
 
 - Community self-registration with full name, email, password confirmation, and email verification
-- Invitation-based onboarding for CHWs, reviewers, and administrators
+- Invitation-based onboarding for CHWs, Health Experts, and administrators
 - Account states and server-side role authorization
 - Argon2 password hashing
 - Short-lived JWT access tokens and rotating persisted refresh sessions

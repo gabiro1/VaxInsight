@@ -13,6 +13,7 @@ import { api } from "../api/client";
 
 const ACCESS_TOKEN_KEY = "vaxinsight.access_token";
 const REFRESH_TOKEN_KEY = "vaxinsight.refresh_token";
+const PENDING_EMAIL_VERIFICATION_KEY = "vaxinsight.pending_email_verification";
 
 const AuthContext = createContext(null);
 
@@ -27,6 +28,7 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [ready, setReady] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
+  const [pendingEmailVerification, setPendingEmailVerification] = useState(null);
   const sessionRef = useRef(null);
   const refreshPromiseRef = useRef(null);
   const sessionVersionRef = useRef(0);
@@ -35,6 +37,15 @@ export function AuthProvider({ children }) {
     sessionVersionRef.current += 1;
     sessionRef.current = nextSession;
     setSession(nextSession);
+  }, []);
+
+  const persistPendingEmailVerification = useCallback(async (email) => {
+    setPendingEmailVerification(email);
+    if (email) {
+      await SecureStore.setItemAsync(PENDING_EMAIL_VERIFICATION_KEY, email);
+    } else {
+      await SecureStore.deleteItemAsync(PENDING_EMAIL_VERIFICATION_KEY);
+    }
   }, []);
 
   const storeTokens = useCallback(async (tokens) => {
@@ -74,13 +85,14 @@ export function AuthProvider({ children }) {
           user,
         });
         setSessionExpired(false);
+        await persistPendingEmailVerification(null);
       } catch (error) {
         await clearStoredTokens();
         setActiveSession(null);
         throw error;
       }
     },
-    [setActiveSession, storeTokens],
+    [persistPendingEmailVerification, setActiveSession, storeTokens],
   );
 
   useEffect(() => {
@@ -89,14 +101,22 @@ export function AuthProvider({ children }) {
     Promise.all([
       SecureStore.getItemAsync(ACCESS_TOKEN_KEY),
       SecureStore.getItemAsync(REFRESH_TOKEN_KEY),
+      SecureStore.getItemAsync(PENDING_EMAIL_VERIFICATION_KEY),
     ])
-      .then(async ([accessToken, refreshToken]) => {
-        if (!accessToken) return;
+      .then(async ([accessToken, refreshToken, pendingEmail]) => {
+        if (!accessToken) {
+          if (active && pendingEmail) setPendingEmailVerification(pendingEmail);
+          return;
+        }
         try {
           const nextSession = await loadProfile(accessToken, refreshToken);
-          if (active) setActiveSession(nextSession);
+          if (active) {
+            setActiveSession(nextSession);
+            if (pendingEmail) await persistPendingEmailVerification(null);
+          }
         } catch {
           await clearStoredTokens();
+          if (active && pendingEmail) setPendingEmailVerification(pendingEmail);
         }
       })
       .finally(() => {
@@ -106,7 +126,7 @@ export function AuthProvider({ children }) {
     return () => {
       active = false;
     };
-  }, [loadProfile, setActiveSession]);
+  }, [loadProfile, persistPendingEmailVerification, setActiveSession]);
 
   const signIn = useCallback(
     async (credentials) => {
@@ -231,13 +251,14 @@ export function AuthProvider({ children }) {
         await clearStoredTokens();
         setActiveSession(null);
         setSessionExpired(false);
+        await persistPendingEmailVerification(nextEmail);
       } else if (currentSession) {
         setActiveSession({ ...currentSession, user });
       }
 
       return user;
     },
-    [authenticatedRequest, setActiveSession],
+    [authenticatedRequest, persistPendingEmailVerification, setActiveSession],
   );
 
   const deleteAccount = useCallback(
@@ -246,9 +267,10 @@ export function AuthProvider({ children }) {
       await clearStoredTokens();
       setActiveSession(null);
       setSessionExpired(false);
+      await persistPendingEmailVerification(null);
       return result;
     },
-    [authenticatedRequest, setActiveSession],
+    [authenticatedRequest, persistPendingEmailVerification, setActiveSession],
   );
 
   const signOut = useCallback(async () => {
@@ -263,7 +285,8 @@ export function AuthProvider({ children }) {
     await clearStoredTokens();
     setActiveSession(null);
     setSessionExpired(false);
-  }, [setActiveSession]);
+    await persistPendingEmailVerification(null);
+  }, [persistPendingEmailVerification, setActiveSession]);
 
   const value = useMemo(
     () => ({
@@ -272,6 +295,7 @@ export function AuthProvider({ children }) {
       isAdministrator: session?.user?.role === "administrator",
       ready,
       sessionExpired,
+      pendingEmailVerification,
       authenticatedRequest,
       signIn,
       register,
@@ -283,7 +307,7 @@ export function AuthProvider({ children }) {
       deleteAccount,
       signOut,
     }),
-    [acceptInvitation, authenticatedRequest, changePassword, deleteAccount, ready, refreshProfile, register, session, sessionExpired, signIn, signOut, updateProfile, verifyEmail],
+    [acceptInvitation, authenticatedRequest, changePassword, deleteAccount, pendingEmailVerification, ready, refreshProfile, register, session, sessionExpired, signIn, signOut, updateProfile, verifyEmail],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

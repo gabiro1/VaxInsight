@@ -56,7 +56,7 @@ truth.
   - `GET /api/v1/questions`
   - `GET /api/v1/questions/{question_id}`
   - `POST /api/v1/questions/{question_id}/analysis`
-- Reviewers use:
+- Health Experts use:
   - `GET /api/v1/review/questions`
   - `GET /api/v1/review/questions/{question_id}`
   - `POST /api/v1/review/questions/{question_id}/response`
@@ -87,7 +87,7 @@ The Expo client now includes:
   stored user preference.
 - Official vaccine information list/detail screens.
 - Question composer, owner question list, and question detail screens.
-- Reviewer question queue and professional-response publishing screens.
+- Health Expert question queue and professional-response publishing screens.
 - Home actions for official information, asking a question, viewing owned
   questions, and reviewer question review.
 - English and Kinyarwanda feature copy, status labels, loading, empty, and error
@@ -166,7 +166,7 @@ only on successful API or bundle tests.
 ## Security and Governance Notes
 
 - Question reads are owner-scoped unless the caller is an authorized reviewer.
-- Reviewer publishing is separate from question submission and analysis request.
+- Health Expert publishing is separate from question submission and analysis request.
 - Administrator content management does not grant unrestricted access to private
   questions or research data.
 - Account deletion includes the new question workflow and keeps the existing

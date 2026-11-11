@@ -212,8 +212,8 @@ def request_analysis(
     response_description="Questions awaiting professional response.",
     summary="List questions for professional review",
     description=(
-        "Return the unassigned reviewer queue. The question, latest analysis, and "
-        "latest published response are available only to reviewers."
+        "Return the unassigned Health Expert queue. The question, latest analysis, and "
+        "latest published response are available only to Health Experts."
     ),
     responses=documented_responses(
         status.HTTP_401_UNAUTHORIZED,
@@ -235,7 +235,7 @@ def list_questions_for_review(
     status_code=status.HTTP_200_OK,
     response_description="One question awaiting professional response.",
     summary="Get a question for professional review",
-    description="Return one queue item and its separate analysis output to a reviewer.",
+    description="Return one queue item and its separate analysis output to a Health Expert.",
     responses=documented_responses(
         status.HTTP_401_UNAUTHORIZED,
         status.HTTP_403_FORBIDDEN,

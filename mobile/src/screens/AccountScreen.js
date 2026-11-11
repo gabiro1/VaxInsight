@@ -79,11 +79,7 @@ export function AccountScreen({ navigation }) {
         ...(emailChanged ? { email: trimmedEmail } : {}),
       };
       await updateProfile(details);
-      if (emailChanged) {
-        navigation.navigate("VerifyEmail", { email: trimmedEmail });
-      } else {
-        setNotice(t.profileUpdated);
-      }
+      setNotice(emailChanged ? t.verificationPending : t.profileUpdated);
     } catch (requestError) {
       setError(getErrorMessage(requestError, t));
     } finally {
@@ -159,6 +155,18 @@ export function AccountScreen({ navigation }) {
 
           <AppearanceSelector />
 
+          <View style={styles.aboutCard}>
+            <View style={styles.aboutHeading}>
+              <View style={styles.aboutIcon}>
+                <Ionicons color={colors.orange} name="information-circle-outline" size={22} />
+              </View>
+              <View style={styles.aboutCopy}>
+                <AppText variant="section">{t.aboutVaxInsightTitle}</AppText>
+                <AppText style={styles.aboutDescription}>{t.aboutVaxInsightDescription}</AppText>
+              </View>
+            </View>
+          </View>
+
           <View style={styles.section}>
             <AppText variant="section">{t.personalInformation}</AppText>
             <InputField autoCapitalize="words" label={t.fullName} onChangeText={setFullName} value={fullName} />
@@ -224,6 +232,11 @@ const createStyles = (colors) => StyleSheet.create({
   profileCopy: { flex: 1, gap: spacing.xxs },
   profileLabel: { fontSize: 12 },
   meta: { fontSize: 13 },
+  aboutCard: { padding: spacing.lg, borderRadius: radii.lg, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, ...getShadows(colors).card },
+  aboutHeading: { flexDirection: "row", alignItems: "flex-start", gap: spacing.sm },
+  aboutIcon: { width: 42, height: 42, borderRadius: 21, alignItems: "center", justifyContent: "center", backgroundColor: colors.accentBackground },
+  aboutCopy: { flex: 1, gap: spacing.xs },
+  aboutDescription: { color: colors.secondaryText, lineHeight: 21 },
   section: { padding: spacing.lg, borderRadius: radii.lg, backgroundColor: colors.surface, gap: spacing.md, ...getShadows(colors).card },
   actions: { gap: spacing.md, paddingTop: spacing.sm },
   dangerSection: {

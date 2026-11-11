@@ -26,7 +26,7 @@ class ReviewPersistenceError(Exception):
 
 
 class ReviewerNotEligible(Exception):
-    """Raised when an assignment target is not an active reviewer."""
+    """Raised when an assignment target is not an active Health Expert."""
 
 
 class AssignmentStateConflict(Exception):
@@ -76,7 +76,7 @@ def create_assignment(
     narrative_id: UUID,
     reviewer_id: UUID,
 ) -> NarrativeAssignment | None:
-    """Create one active reviewer assignment while locking the narrative row."""
+    """Create one active Health Expert assignment while locking the narrative row."""
 
     try:
         narrative = db.scalar(
@@ -164,7 +164,7 @@ def reassign_assignment(
             return None
         if active_assignment.reviewer_id == reviewer_id:
             raise AssignmentStateConflict(
-                "Narrative is already assigned to this reviewer"
+                "Narrative is already assigned to this Health Expert"
             )
 
         reviewer = db.scalar(select(User).where(User.id == reviewer_id))
@@ -263,7 +263,7 @@ def list_assignments(
     page_size: int,
     include_narratives: bool,
 ) -> AssignmentPage:
-    """List active assignments with content only for the assigned reviewer."""
+    """List active assignments with content only for the assigned Health Expert."""
 
     filters = [NarrativeAssignment.status == AssignmentStatus.ACTIVE.value]
     if reviewer_id is not None:
@@ -311,7 +311,7 @@ def get_visible_assignment(
     reviewer_id: UUID | None,
     can_manage_assignments: bool,
 ) -> tuple[NarrativeAssignment, Narrative | None] | None:
-    """Return metadata to administrators and content only to the assigned reviewer."""
+    """Return metadata to administrators and content only to the assigned Health Expert."""
 
     try:
         assignment = db.get(NarrativeAssignment, assignment_id)
@@ -343,7 +343,7 @@ def list_review_history(
     page: int,
     page_size: int,
 ) -> ReviewHistoryPage | None:
-    """List immutable review records only to the assigned reviewer or administrators."""
+    """List immutable review records only to the assigned Health Expert or administrators."""
 
     try:
         assignment = db.get(NarrativeAssignment, assignment_id)
@@ -356,7 +356,7 @@ def list_review_history(
         ):
             return None
 
-        # A replacement reviewer needs the narrative's prior review history, while
+        # A replacement Health Expert needs the narrative's prior review history, while
         # access is still gated by the currently active assignment above.
         review_filter = NarrativeReview.narrative_id == assignment.narrative_id
         total = (

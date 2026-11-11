@@ -7,18 +7,19 @@
 3. **Complete**: logout confirmation and shared loader/empty/error/offline primitives are available.
 4. **Complete**: email OTP verification, resend, password-reset confirmation, and invitation deep-link routes use existing backend endpoints; successful verification opens Home.
 5. **Complete**: `AccountScreen` covers supported email, password, and self-service deletion operations.
-6. **Remaining**: add dedicated initialization-failure copy and device-level offline detection if product requires it.
+6. **Complete**: email changes enter an explicit verification-only route after the backend invalidates the old session.
+7. **Remaining**: add dedicated initialization-failure copy and device-level offline detection if product requires it.
 
 ## Phase 2: Narrative Workflows
 
 1. **Complete**: owner-scoped list, empty, detail, history, submit, update, validation, and conflict states are implemented.
 2. **Complete**: owner screens use only `narrative.create`, `narrative.read.own`, and `narrative.update.own` API paths.
 3. **Complete**: composer content remains in memory across recoverable request failures.
-4. **Complete**: role-aware Home actions expose owner workflows to community members, CHWs, and reviewers.
+4. **Complete**: role-aware Home actions expose owner workflows to community members and CHWs; Health Experts use assignment-scoped review workflows.
 5. **Complete**: an active review assignment prevents owner edits from changing the version under review; the API returns a recoverable conflict.
 6. **Remaining**: add mobile unit/integration coverage for API fixtures and navigation guards.
 
-## Phase 3: Reviewer Workflow
+## Phase 3: Health Expert Workflow
 
 1. **Complete**: assigned queue from `GET /api/v1/reviews/assignments`.
 2. **Complete**: assigned narrative detail and review history with stale-resource states.
@@ -50,23 +51,36 @@ and governance approvals exist. A future unavailable state is appropriate now.
 2. **Complete**: community members and CHWs can submit questions, view their own
    question history, and request an analysis attempt without receiving fabricated
    AI or medical output.
-3. **Complete**: reviewers can inspect the question queue and publish a separate
+3. **Complete**: Health Experts can inspect the question queue and publish a separate
    professional response that is shown on the question detail screen.
 4. **Complete**: Home actions and English/Kinyarwanda translations expose the new
    workflows with role-aware visibility.
 5. **Complete**: question creation and repeat analysis requests use the backend
    rate-limit boundary; the mobile client preserves the explicit unavailable state.
-6. **Remaining**: add mobile tests for question ownership, unavailable analysis,
-   reviewer publishing, stale responses, and navigation guards.
+6. **Complete**: Home, Resources, official-content detail, source-link, timeout, and CHW navigation states are covered by the current client contract.
+7. **Remaining**: add mobile tests for question ownership, unavailable analysis,
+   Health Expert publishing, stale responses, and navigation guards.
 
 ## Phase 7: CHW Personal Activity
 
 1. **Complete**: CHW Home uses the owner-scoped `GET /api/v1/dashboard/summary`
    endpoint for submitted, under-review, reviewed, and recent narrative data.
-2. **Complete**: the endpoint exposes status only and excludes reviewer notes,
+2. **Complete**: the endpoint exposes status only and excludes Health Expert notes,
    outcomes, evidence, and other users' records.
 3. **Remaining**: confirm whether the status-only owner projection is approved
    as a final product contract; owner feedback and outcomes remain blocked.
+
+## Phase 8: CHW Resources And Verification
+
+1. **Complete**: add the role-aware Resources hub with official vaccine-content
+   navigation, CHW question entry, and an honest empty state for unavailable
+   learning materials.
+2. **Complete**: add source-backed vaccine article detail and original-source
+   links using the existing content response contract.
+3. **Complete**: add English/Kinyarwanda strings for CHW copy, status labels,
+   timeout/validation errors, resources, and article detail.
+4. **Remaining**: adopt a component/device test harness and add rendered state
+   coverage once the mobile testing stack is approved.
 
 The full research boundary, Phase 1 data requirements, and Phase 3 evaluation
 plan are recorded in

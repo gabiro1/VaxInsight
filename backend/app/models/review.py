@@ -20,7 +20,7 @@ from app.database.database import Base
 
 
 class AssignmentStatus(str, Enum):
-    """Lifecycle of a narrative reviewer assignment."""
+    """Lifecycle of a narrative Health Expert assignment."""
 
     ACTIVE = "active"
     REVOKED = "revoked"

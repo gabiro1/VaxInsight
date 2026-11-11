@@ -589,6 +589,11 @@ def test_openapi_documents_request_and_response_models():
         == "#/components/schemas/EmailVerificationResendRequest"
     )
 
+    narrative_response = document["components"]["schemas"]["NarrativeResponse"]
+    assert "review_status" in narrative_response["properties"]
+    assert "owner" in narrative_response["properties"]["review_status"]["description"]
+    assert "notes" not in narrative_response["properties"]
+
 
 def test_public_response_schemas_do_not_expose_sensitive_fields():
     document = app.openapi()

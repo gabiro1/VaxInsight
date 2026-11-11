@@ -14,7 +14,9 @@ import {
   getErrorMessage,
   ownerNarrativeStatusLabel,
   ownerNarrativeTone,
+  reviewStatusLabel,
 } from "../utils/errors";
+import { loadAllReviewerAssignments } from "../utils/reviewer";
 import { getShadows, layout, radii, spacing, typography } from "../theme/tokens";
 import { AppText } from "../components/AppText";
 import { BrandMark } from "../components/BrandMark";
@@ -56,14 +58,18 @@ export function HomeScreen({ navigation }) {
   const [adminSummary, setAdminSummary] = useState(null);
   const [adminSummaryLoading, setAdminSummaryLoading] = useState(false);
   const [adminSummaryError, setAdminSummaryError] = useState("");
+  const [reviewerAssignments, setReviewerAssignments] = useState([]);
+  const [reviewerLoading, setReviewerLoading] = useState(true);
+  const [reviewerError, setReviewerError] = useState("");
   const [dialog, setDialog] = useState(null);
 
   const canManageNarratives = ["community_member", "chw", "reviewer", "administrator"].includes(user?.role);
   const isAdmin = user?.role === "administrator";
   const isChw = user?.role === "chw";
+  const isReviewer = user?.role === "reviewer";
 
   const loadRecentNarratives = useCallback(async () => {
-    if (!canManageNarratives || isChw) return;
+    if (!canManageNarratives || isChw || isReviewer) return;
     setRecentLoading(true);
     setRecentError("");
     try {
@@ -76,7 +82,21 @@ export function HomeScreen({ navigation }) {
     } finally {
       setRecentLoading(false);
     }
-  }, [authenticatedRequest, canManageNarratives, isChw, t]);
+  }, [authenticatedRequest, canManageNarratives, isChw, isReviewer, t]);
+
+  const loadReviewerWorkload = useCallback(async () => {
+    if (!isReviewer) return;
+    setReviewerLoading(true);
+    setReviewerError("");
+    try {
+      const assignments = await loadAllReviewerAssignments(authenticatedRequest);
+      setReviewerAssignments(assignments);
+    } catch (requestError) {
+      setReviewerError(getErrorMessage(requestError, t));
+    } finally {
+      setReviewerLoading(false);
+    }
+  }, [authenticatedRequest, isReviewer, t]);
 
   const loadPersonalSummary = useCallback(async () => {
     if (!isChw) return;
@@ -133,10 +153,11 @@ export function HomeScreen({ navigation }) {
 
   useEffect(() => {
     loadRecentNarratives();
+    loadReviewerWorkload();
     loadPersonalSummary();
     loadVaccineContent();
     loadAdminSummary();
-  }, [loadAdminSummary, loadPersonalSummary, loadRecentNarratives, loadVaccineContent]);
+  }, [loadAdminSummary, loadPersonalSummary, loadRecentNarratives, loadReviewerWorkload, loadVaccineContent]);
 
   const refresh = async () => {
     setRefreshing(true);
@@ -144,7 +165,13 @@ export function HomeScreen({ navigation }) {
     try {
       await Promise.all([
         refreshProfile(),
-        isChw ? loadPersonalSummary() : canManageNarratives ? loadRecentNarratives() : Promise.resolve(),
+        isChw
+          ? loadPersonalSummary()
+          : isReviewer
+            ? loadReviewerWorkload()
+            : canManageNarratives
+              ? loadRecentNarratives()
+              : Promise.resolve(),
         loadVaccineContent(),
         isAdmin ? loadAdminSummary() : Promise.resolve(),
       ]);
@@ -156,6 +183,17 @@ export function HomeScreen({ navigation }) {
   };
 
   const displayName = user?.full_name || user?.email?.split("@")[0] || "VaxInsight";
+  const reviewerSummary = reviewerAssignments.reduce((summary, assignment) => {
+    const status = assignment.review_status;
+    if (status === "pending") summary.pending += 1;
+    if (status === "in_review") summary.inReview += 1;
+    if (status === "reviewed") summary.reviewed += 1;
+    if (status === "requires_escalation") summary.escalated += 1;
+    return summary;
+  }, { pending: 0, inReview: 0, reviewed: 0, escalated: 0 });
+  const recentReviewerAssignments = [...reviewerAssignments]
+    .sort((left, right) => new Date(right.updated_at || right.assigned_at).getTime() - new Date(left.updated_at || left.assigned_at).getTime())
+    .slice(0, 3);
 
   const confirmSignOut = () => {
     setDialog("signOut");
@@ -267,6 +305,40 @@ export function HomeScreen({ navigation }) {
               </View>
             </LinearGradient>
           </Pressable>
+        ) : isReviewer ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t.reviewerHeroAction}
+            onPress={() => navigation.navigate("ReviewQueue")}
+            style={({ pressed }) => [styles.reviewerHeroCard, pressed && styles.pressed]}
+          >
+            <LinearGradient
+              colors={["#171311", "#251914", "#110F0E"]}
+              end={{ x: 1, y: 0.8 }}
+              start={{ x: 0, y: 0.2 }}
+              style={styles.reviewerHeroGradient}
+            >
+              <View style={styles.reviewerHeroContent}>
+                <View style={styles.reviewerWorkspacePill}>
+                  <AppText style={styles.reviewerWorkspacePillText}>{t.reviewerWorkspaceLabel}</AppText>
+                </View>
+                <AppText variant="card" style={styles.reviewerHeroTitle}>{t.reviewerHeroTitle}</AppText>
+                <AppText style={styles.reviewerHeroDescription}>{t.reviewerHeroDescription}</AppText>
+                <View style={styles.reviewerHeroAction}>
+                  <AppText style={styles.reviewerHeroActionText}>{t.reviewerHeroAction}</AppText>
+                  <Ionicons color={colors.inverseText} name="arrow-forward" size={19} />
+                </View>
+              </View>
+              <View style={styles.reviewerHeroGraphic}>
+                <Image
+                  accessibilityIgnoresInvertColors
+                  source={require("../../assets/reviewer-health-expert.png")}
+                  resizeMode="contain"
+                  style={styles.reviewerHeroImage}
+                />
+              </View>
+            </LinearGradient>
+          </Pressable>
         ) : (
           <View style={styles.workspaceCard}>
             <View style={styles.workspaceHeader}>
@@ -315,6 +387,58 @@ export function HomeScreen({ navigation }) {
                   value={personalSummary.activity?.reviewed}
                 />
               </View>
+            ) : null}
+          </View>
+        ) : null}
+
+        {isReviewer ? (
+          <View style={styles.reviewerSection}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionTitleCopy}>
+                <AppText variant="section">{t.assignedWorkload}</AppText>
+                <AppText style={styles.sectionDescription}>{t.assignedWorkloadDescription}</AppText>
+              </View>
+              {reviewerLoading ? <ActivityIndicator color={colors.orange} /> : null}
+            </View>
+            {reviewerError ? <InlineNotice message={reviewerError} /> : null}
+            {!reviewerLoading && !reviewerError ? (
+              <>
+                <View style={styles.platformMetricGrid}>
+                  <PlatformMetric colors={colors} icon="clipboard-outline" label={t.assignedNarratives} styles={styles} value={reviewerAssignments.length} />
+                  <PlatformMetric colors={colors} icon="time-outline" label={t.pendingReviews} styles={styles} value={reviewerSummary.pending} />
+                  <PlatformMetric colors={colors} icon="create-outline" label={t.inProgressReviews} styles={styles} value={reviewerSummary.inReview} />
+                  <PlatformMetric colors={colors} icon="checkmark-circle-outline" label={t.completedReviews} styles={styles} value={reviewerSummary.reviewed} />
+                  <PlatformMetric colors={colors} icon="warning-outline" label={t.escalatedNarratives} styles={styles} value={reviewerSummary.escalated} />
+                </View>
+                <View style={styles.reviewerActivitySection}>
+                  <View style={styles.sectionHeader}>
+                    <AppText variant="section">{t.recentReviewActivity}</AppText>
+                    <Pressable accessibilityRole="button" accessibilityLabel={t.openAssignments} hitSlop={8} onPress={() => navigation.navigate("ReviewQueue")} style={styles.viewAll}>
+                      <AppText style={styles.viewAllLabel}>{t.viewAll}</AppText>
+                      <Ionicons color={colors.orange} name="arrow-forward" size={16} />
+                    </Pressable>
+                  </View>
+                  {!recentReviewerAssignments.length ? <AppText style={styles.recentEmpty}>{t.noAssignmentsDescription}</AppText> : null}
+                  <View style={styles.recentList}>
+                    {recentReviewerAssignments.map((assignment) => (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={assignment.narrative?.content || t.reviewDetails}
+                        key={assignment.id}
+                        onPress={() => navigation.navigate("ReviewDetail", { assignmentId: assignment.id })}
+                        style={({ pressed }) => [styles.recentCard, pressed && styles.pressed]}
+                      >
+                        <View style={styles.recentCardTop}>
+                          <StatusPill label={reviewStatusLabel(assignment.review_status, t)} tone={assignment.review_status === "requires_escalation" ? "warning" : assignment.review_status === "reviewed" ? "success" : "accent"} />
+                          <Ionicons color={colors.muted} name="chevron-forward" size={18} />
+                        </View>
+                        <AppText numberOfLines={2} style={styles.recentContent}>{assignment.narrative?.content || t.reviewDetails}</AppText>
+                        <AppText style={styles.recentMeta}>{t.updatedAt}: {formatDate(assignment.updated_at || assignment.assigned_at, language)}</AppText>
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+              </>
             ) : null}
           </View>
         ) : null}
@@ -408,7 +532,7 @@ export function HomeScreen({ navigation }) {
           ) : null}
         </View>
 
-        {canManageNarratives ? (
+        {canManageNarratives && !isReviewer ? (
           <View style={styles.recentSection}>
             <View style={styles.sectionHeader}>
               <AppText variant="section">{isChw ? t.myRecentSubmissions : t.recentNarratives}</AppText>
@@ -538,6 +662,17 @@ const createStyles = (colors) => StyleSheet.create({
   chwHeroGraphic: { width: 142, alignSelf: "stretch", position: "relative", justifyContent: "flex-end", marginRight: -spacing.xs },
   chwHeroGlow: { position: "absolute", width: 156, height: 156, borderRadius: 78, backgroundColor: "rgba(160, 73, 31, 0.28)", top: 14, left: -10 },
   chwHeroImage: { position: "absolute", width: 222, height: 270, right: -30, bottom: -10 },
+  reviewerHeroCard: { minHeight: 252, borderRadius: radii.lg, overflow: "hidden", ...getShadows(colors).card },
+  reviewerHeroGradient: { flex: 1, minHeight: 252, flexDirection: "row", overflow: "hidden", position: "relative" },
+  reviewerHeroContent: { flex: 1, maxWidth: 246, padding: spacing.lg, paddingRight: spacing.sm, zIndex: 2 },
+  reviewerWorkspacePill: { alignSelf: "flex-start", paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, borderRadius: radii.pill, backgroundColor: colors.orange },
+  reviewerWorkspacePillText: { color: colors.inverseText, fontFamily: typography.family.bodySemibold, fontSize: 13 },
+  reviewerHeroTitle: { color: colors.inverseText, fontSize: 22, lineHeight: 28, marginTop: spacing.lg, maxWidth: 212 },
+  reviewerHeroDescription: { color: colors.workspaceSecondary, fontSize: 14, lineHeight: 20, marginTop: spacing.xs, maxWidth: 212 },
+  reviewerHeroAction: { alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: spacing.sm, marginTop: spacing.lg, paddingHorizontal: spacing.md, minHeight: 44, borderRadius: radii.pill, backgroundColor: colors.orange },
+  reviewerHeroActionText: { color: colors.inverseText, fontFamily: typography.family.bodySemibold, fontSize: 14 },
+  reviewerHeroGraphic: { position: "absolute", top: 0, right: 0, bottom: 0, width: 155, zIndex: 1 },
+  reviewerHeroImage: { position: "absolute", width: 260, height: 260, right: -60, bottom: -8 },
   workspaceCard: { padding: spacing.lg, borderRadius: radii.lg, backgroundColor: colors.workspaceSurface, ...getShadows(colors).card },
   workspaceHeader: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
   workspaceIcon: { width: 42, height: 42, borderRadius: 21, backgroundColor: colors.whiteScrim, alignItems: "center", justifyContent: "center" },
@@ -582,6 +717,8 @@ const createStyles = (colors) => StyleSheet.create({
   questionDescription: { color: colors.secondaryText, lineHeight: 22 },
   recentList: { gap: spacing.sm },
   recentCard: { padding: spacing.md, borderRadius: radii.md, backgroundColor: colors.surface, gap: spacing.sm, ...getShadows(colors).card },
+  reviewerSection: { gap: spacing.md },
+  reviewerActivitySection: { gap: spacing.md },
   pressed: { opacity: 0.82 },
   recentCardTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   recentContent: { color: colors.primaryText, fontSize: 15, lineHeight: 22 },

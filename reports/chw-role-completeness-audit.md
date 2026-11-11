@@ -38,7 +38,7 @@ API, data model, authorization boundary, and tests support the complete flow.
 | Login, refresh, logout, and session restoration | `IMPLEMENTED` | `backend/app/api/routes/auth.py`, `backend/app/services/sessions.py`, `backend/app/api/dependencies.py`, and `mobile/src/context/AuthContext.js`. |
 | Server-side CHW RBAC | `IMPLEMENTED` | `backend/app/core/permissions.py` and `require_permissions` in `backend/app/api/dependencies.py`; account state is reloaded before authorization. |
 | Own narrative create/read/update/history | `IMPLEMENTED` as a neutral record workflow | `POST/GET/PATCH /api/v1/narratives`, `GET /api/v1/narratives/{id}/history`, owner predicates in `backend/app/services/narratives.py`, and `tests/test_narrative_api.py`. |
-| Published vaccine-content read access | `PARTIALLY IMPLEMENTED` | `GET /api/v1/vaccine-content` and `GET /api/v1/vaccine-content/{id}` are permission protected and mobile-rendered, but there is no approved source allow-list or publication governance. |
+| Published vaccine-content read access | `PARTIALLY IMPLEMENTED` | `GET /api/v1/vaccine-content` and `GET /api/v1/vaccine-content/{id}` are permission protected and mobile-rendered with original-source links, but there is no approved source allow-list or publication governance. |
 | Owned question workflow | `IMPLEMENTED` at the provisional owner-scoped boundary | `backend/app/api/routes/questions.py` and `backend/app/services/questions.py` support create/list/detail, unavailable analysis, and published professional responses; `QuestionListScreen`, `QuestionComposerScreen`, and `QuestionDetailScreen` are reachable for CHWs. Real analysis remains unavailable. |
 | Profile, password, email, language, theme, and logout | `IMPLEMENTED` | `mobile/src/screens/AccountScreen.js`, `mobile/src/context/AuthContext.js`, `LanguageContext.js`, and `ThemeContext.js`; account status labels are localized through `accountStatusLabel`. |
 | Real AI/XAI output | `BLOCKED` | `get_analysis_provider()` in `backend/app/services/questions.py` returns `None`; the client correctly shows an unavailable state. No approved dataset, model, inference, or explanation contract exists. |
@@ -80,19 +80,19 @@ API, data model, authorization boundary, and tests support the complete flow.
 | View own narrative submission status | `PARTIALLY IMPLEMENTED` | `GET /api/v1/dashboard/summary` returns owned recent narratives with status-only active review metadata; reviewer assignment resources remain protected. |
 | Identify awaiting/in-review/reviewed/escalated records | `PARTIALLY IMPLEMENTED` | The personal dashboard exposes `pending`, `in_review`, `reviewed`, and `requires_escalation` status labels without internal history; policy confirmation is still required before treating this as a final owner-feedback contract. |
 | View permitted review outcomes | `BLOCKED` | `NarrativeReviewResponse` contains outcomes and confidential notes/evidence; no approved owner-safe subset is defined. |
-| View submitter-facing feedback | `BLOCKED` | There is no separate feedback field or correction workflow. Reviewer notes are intentionally not exposed to narrative owners. |
+| View submitter-facing feedback | `BLOCKED` | There is no separate feedback field or correction workflow. Health Expert notes are intentionally not exposed to narrative owners. |
 | Respond to clarification requests | `BLOCKED` | No approved clarification state, response model, notification, or escalation-resolution policy exists. |
-| Reviewer workflow integrity | `PARTIALLY IMPLEMENTED` | `reviews.py` and `services/reviews.py` provide assignment, status, review, evidence, escalation, and history for reviewers/managers. Owners are correctly denied, but narrative edits after assignment are not version-bound. |
+| Health Expert workflow integrity | `PARTIALLY IMPLEMENTED` | `reviews.py` and `services/reviews.py` provide assignment, status, review, evidence, escalation, and history for Health Experts/managers. Owners are correctly denied, but narrative edits after assignment are not version-bound. |
 
 ### D. Trusted Vaccine Information And Educational Resources
 
 | Audited capability | Status | Evidence and finding |
 |---|---|---|
 | Browse published vaccine information | `PARTIALLY IMPLEMENTED` | `OfficialVaccineInfoScreen.js` calls the published content API and displays title, summary, body, source, authority, and publication date. No approved content package is present. |
-| Source attribution and publication date | `IMPLEMENTED` at API/UI field level | `VaccineContentResponse` includes source metadata and `published_at`; mobile renders source, authority, and date. The original source URL is not currently rendered as a link. |
+| Source attribution and publication date | `IMPLEMENTED` at API/UI field level | `VaccineContentResponse` includes source metadata, original URL, and `published_at`; mobile renders source, authority, date, and an external source-link action. |
 | Official announcements and educational materials | `BLOCKED` | `SD-009` is unresolved; no approved RBC, WHO, WHO Africa, UNICEF, or other source allow-list/content integration is present. Do not fabricate content or citations. |
 | Source currency, withdrawal, and approval governance | `BLOCKED` | Administrator publication exists, but independent public-health approval, review cadence, withdrawal, and version governance are not defined. |
-| CHW resource entry point | `PARTIALLY IMPLEMENTED` | The existing `VaccineInfo` bottom-tab route is reusable, but Home does not explain resource use or distinguish official guidance from general information. |
+| CHW resource entry point | `IMPLEMENTED` at the supported boundary | `ResourcesScreen` links published vaccine information and CHW questions, while learning materials remain an honest empty state until approved content exists. |
 
 ### E. Community Communication And Education
 
@@ -191,15 +191,17 @@ is written. It must not be represented by an ad-hoc `is_community_collected` fla
 - `QuestionListScreen.js`, `QuestionComposerScreen.js`, and
   `QuestionDetailScreen.js` are registered in `RootNavigator.js`; CHWs can reach
   the list from bottom navigation and the composer from Home.
-- `OfficialVaccineInfoScreen.js` renders published content and source metadata but
-  does not render the original source URL as an external link.
+- `OfficialVaccineInfoScreen.js` renders published content, source metadata, and
+  the backend-provided original source URL as an external link. `ResourcesScreen`
+  provides the CHW resource hub and an honest empty learning-resource state.
 - `AccountScreen.js` supports profile, password, email verification, appearance,
   deletion, and logout. Account status uses the localized `accountStatusLabel`
   helper.
-- `OfflineState` exists, but the API client has no timeout/abort behavior and the
+- `OfflineState` exists and the API client now aborts requests after 15 seconds;
   narrative/question forms do not persist drafts across app termination.
-- The app has only the existing theme-preference Node tests; no mobile component,
-  navigation, CHW, API-mock, accessibility, or device-flow tests exist.
+- The repository now has Node contract tests for CHW routes, source-backed data,
+  email verification routing, timeouts, and theme preferences. Component,
+  navigation-rendering, API-mock, accessibility, and device-flow tests remain.
 
 ## 9. Testing Gaps
 
@@ -219,28 +221,20 @@ remaining gaps are:
 
 Focused verification for this implementation passed:
 
-- `python -m pytest tests/test_dashboard_api.py tests/test_supervisor_workflow.py tests/test_narrative_review_workflow.py tests/test_openapi_documentation.py -q`: `28 passed`.
+- `python -m pytest tests/test_dashboard_api.py tests/test_supervisor_workflow.py tests/test_narrative_review_workflow.py tests/test_openapi_documentation.py tests/test_database_isolation.py -q`: `28 passed`.
 - `python -m ruff check backend tests`: passed.
 - `python -m alembic check`: no new upgrade operations detected.
-- Mobile theme tests: `4 passed`; Babel compilation passed for six changed modules; Android Expo export passed.
+- Mobile Node tests: `9 passed`; Android Expo export passed.
 
-A full suite run reached `255 passed` and six failures in existing last-active-
-administrator tests because the configured development database contains one
-real active administrator in addition to the temporary test accounts. Those
-tests should be rerun against an isolated test database.
+A full suite run against the isolated `vaccine_ai_test` database passed: `268
+passed`. The development database `vaccine_ai` was not modified.
 
 ## 10. Documentation Gaps
 
-- `docs/mobile/implementation_plan.md` needs to record the completed CHW
-  dashboard, question entry points, and question rate-limit boundary.
-- `docs/mobile/role_navigation_matrix.md` needs current question routes, the
-  personal dashboard route, and CHW permission dependencies.
-- `docs/mobile/screen_inventory.md` needs current CHW dashboard/question status
-  and the active-review edit restriction.
-- `docs/mobile/state_coverage_matrix.md` needs question, personal-dashboard,
-  and active-review conflict rows.
-- `docs/permission_management.md` needs question, vaccine-content,
-  vaccine-analysis, personal-dashboard, and narrative-lock coverage.
+- Current mobile role, state, screen, and permission documentation has been
+  reconciled with the CHW resource, source-link, timeout, and verification flows.
+- `reports/chw-mobile-screen-implementation.md` records the final screen matrix,
+  API map, state coverage, verification results, and unresolved decisions.
 - Historical reports still describe `mobile/` as empty and must not be treated as
   current implementation evidence.
 

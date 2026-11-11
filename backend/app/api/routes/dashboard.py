@@ -21,7 +21,7 @@ personal_dashboard_dependency = require_permissions(Permission.NARRATIVE_READ_OW
     summary="Get the personal dashboard summary",
     description=(
         "Return metrics and recent narratives owned by the authenticated account. "
-        "Review data is limited to status and never includes reviewer notes, "
+        "Review data is limited to status and never includes Health Expert notes, "
         "outcomes, evidence, or other users' records."
     ),
     responses=documented_responses(

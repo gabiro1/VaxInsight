@@ -11,6 +11,7 @@ import { useTheme } from "../context/ThemeContext";
 import { getShadows, layout, radii, spacing } from "../theme/tokens";
 import { AppText } from "../components/AppText";
 import { BrandMark } from "../components/BrandMark";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { ErrorState, FullScreenLoader } from "../components/StateView";
 import { InlineNotice } from "../components/InlineNotice";
 import { InputField, MultilineField } from "../components/InputField";
@@ -50,6 +51,8 @@ export function ReviewDetailScreen({ navigation, route }) {
   const [notes, setNotes] = useState("");
   const [evidence, setEvidence] = useState([blankEvidence()]);
   const [escalationReason, setEscalationReason] = useState("");
+  const [notice, setNotice] = useState("");
+  const [confirmation, setConfirmation] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -75,11 +78,13 @@ export function ReviewDetailScreen({ navigation, route }) {
 
   const changeStatus = async (status) => {
     setError("");
+    setNotice("");
     setAction(status);
     try {
       await authenticatedRequest((token) =>
         api.updateAssignmentStatus(token, assignmentId, { status }),
       );
+      setNotice(status === "in_review" ? t.reviewStarted : "");
       await load();
     } catch (requestError) {
       setError(getErrorMessage(requestError, t));
@@ -88,12 +93,18 @@ export function ReviewDetailScreen({ navigation, route }) {
     }
   };
 
-  const escalate = async () => {
+  const escalate = () => {
     if (!escalationReason.trim()) {
       setError(t.reasonRequired);
       return;
     }
+    setConfirmation("escalate");
+  };
+
+  const confirmEscalation = async () => {
+    setConfirmation(null);
     setError("");
+    setNotice("");
     setAction("escalate");
     try {
       await authenticatedRequest((token) =>
@@ -102,6 +113,7 @@ export function ReviewDetailScreen({ navigation, route }) {
           reason: escalationReason.trim(),
         }),
       );
+      setNotice(t.reviewEscalated);
       await load();
     } catch (requestError) {
       setError(getErrorMessage(requestError, t));
@@ -116,7 +128,7 @@ export function ReviewDetailScreen({ navigation, route }) {
     )));
   };
 
-  const submitReview = async () => {
+  const submitReview = () => {
     if (!outcome) {
       setError(t.reviewOutcomeRequired);
       return;
@@ -128,7 +140,16 @@ export function ReviewDetailScreen({ navigation, route }) {
       setError(t.evidenceRequiredFields);
       return;
     }
+    setConfirmation("submit");
+  };
+
+  const submitConfirmedReview = async () => {
+    const activeEvidence = evidence.filter((item) =>
+      Object.entries(item).some(([key, value]) => key !== "accessed_at" && value.trim()),
+    );
+    setConfirmation(null);
     setError("");
+    setNotice("");
     setAction("submit");
     try {
       await authenticatedRequest((token) =>
@@ -148,6 +169,7 @@ export function ReviewDetailScreen({ navigation, route }) {
       setOutcome("");
       setNotes("");
       setEvidence([blankEvidence()]);
+      setNotice(t.reviewSubmitted);
       await load();
     } catch (requestError) {
       setError(getErrorMessage(requestError, t));
@@ -187,6 +209,7 @@ export function ReviewDetailScreen({ navigation, route }) {
           </View>
         </View>
         {error ? <InlineNotice message={error} /> : null}
+        {notice ? <InlineNotice message={notice} tone="success" /> : null}
         <View style={styles.narrativeCard}>
           <AppText variant="section">{t.narrativeContent}</AppText>
           <AppText style={styles.narrative}>{assignment.narrative?.content || t.notFound}</AppText>
@@ -234,6 +257,15 @@ export function ReviewDetailScreen({ navigation, route }) {
 
         <SecondaryButton label={t.reviewHistory} onPress={() => navigation.navigate("ReviewHistory", { assignmentId })} />
       </ScrollView>
+      <ConfirmDialog
+        cancelLabel={t.cancel}
+        confirmLabel={confirmation === "submit" ? t.submitReview : t.requiresEscalation}
+        description={confirmation === "submit" ? t.confirmReviewSubmissionDescription : t.confirmEscalationDescription}
+        onCancel={() => setConfirmation(null)}
+        onConfirm={confirmation === "submit" ? submitConfirmedReview : confirmEscalation}
+        title={confirmation === "submit" ? t.confirmReviewSubmissionTitle : t.confirmEscalationTitle}
+        visible={Boolean(confirmation)}
+      />
     </SafeAreaView>
   );
 }

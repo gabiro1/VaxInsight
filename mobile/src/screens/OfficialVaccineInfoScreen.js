@@ -16,7 +16,7 @@ import { LanguageSelector } from "../components/LanguageSelector";
 import { SecondaryButton, TextButton } from "../components/PrimaryButton";
 import { formatDate, getErrorMessage } from "../utils/errors";
 
-export function OfficialVaccineInfoScreen({ navigation }) {
+export function OfficialVaccineInfoScreen({ navigation, route }) {
   const { language, t } = useLanguage();
   const { authenticatedRequest } = useAuth();
   const { colors } = useTheme();
@@ -26,6 +26,8 @@ export function OfficialVaccineInfoScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [sourceError, setSourceError] = useState("");
+  const contentCategory = route?.params?.category || "";
+  const isLearningMaterials = contentCategory === "learning_materials";
 
   const load = useCallback(
     async (isRefresh = false) => {
@@ -34,7 +36,10 @@ export function OfficialVaccineInfoScreen({ navigation }) {
       setError("");
       try {
         const result = await authenticatedRequest((token) =>
-          api.listVaccineContent(token, { language }),
+          api.listVaccineContent(token, {
+            language,
+            ...(contentCategory ? { category: contentCategory } : {}),
+          }),
         );
         setItems(result || []);
       } catch (requestError) {
@@ -44,7 +49,7 @@ export function OfficialVaccineInfoScreen({ navigation }) {
         setRefreshing(false);
       }
     },
-    [authenticatedRequest, language, t],
+    [authenticatedRequest, contentCategory, language, t],
   );
 
   useEffect(() => {
@@ -84,9 +89,11 @@ export function OfficialVaccineInfoScreen({ navigation }) {
 
         <View style={styles.intro}>
           <AppText accessibilityRole="header" variant="title">
-            {t.officialVaccineInfo}
+            {isLearningMaterials ? t.learningMaterials : t.officialVaccineInfo}
           </AppText>
-          <AppText style={styles.description}>{t.officialVaccineInfoIntro}</AppText>
+          <AppText style={styles.description}>
+            {isLearningMaterials ? t.learningMaterialsIntro : t.officialVaccineInfoIntro}
+          </AppText>
         </View>
 
         {error && items.length ? <InlineNotice message={error} /> : null}
@@ -100,9 +107,9 @@ export function OfficialVaccineInfoScreen({ navigation }) {
         ) : null}
         {!error && !items.length ? (
           <EmptyState
-            description={t.officialVaccineInfoEmptyDescription}
-            icon="shield-checkmark-outline"
-            title={t.officialVaccineInfoEmptyTitle}
+            description={isLearningMaterials ? t.learningMaterialsEmptyDescription : t.officialVaccineInfoEmptyDescription}
+            icon={isLearningMaterials ? "school-outline" : "shield-checkmark-outline"}
+            title={isLearningMaterials ? t.learningMaterialsEmptyTitle : t.officialVaccineInfoEmptyTitle}
           />
         ) : null}
         {sourceError ? <InlineNotice message={sourceError} /> : null}
@@ -120,7 +127,7 @@ export function OfficialVaccineInfoScreen({ navigation }) {
                   <View style={styles.iconCircle}>
                     <Ionicons
                       color={colors.primaryAccent}
-                      name="shield-checkmark-outline"
+                      name={isLearningMaterials ? "school-outline" : "shield-checkmark-outline"}
                       size={22}
                     />
                   </View>

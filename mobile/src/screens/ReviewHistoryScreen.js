@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { api } from "../api/client";
@@ -25,6 +25,15 @@ export function ReviewHistoryScreen({ navigation, route }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+
+  const openEvidenceUrl = async (url) => {
+    if (!/^https?:\/\//i.test(url || "")) return;
+    try {
+      if (await Linking.canOpenURL(url)) await Linking.openURL(url);
+    } catch {
+      // Keep the source visible when the device cannot open the returned URL.
+    }
+  };
 
   const load = useCallback(
     async (isRefresh = false) => {
@@ -83,6 +92,11 @@ export function ReviewHistoryScreen({ navigation, route }) {
                     <View key={item.id} style={styles.evidenceRow}>
                       <AppText variant="card">{item.source_title}</AppText>
                       <AppText style={styles.meta}>{item.publisher}</AppText>
+                      {item.url && /^https?:\/\//i.test(item.url) ? (
+                        <Pressable accessibilityRole="link" accessibilityLabel={t.openSourceLink} onPress={() => openEvidenceUrl(item.url)}>
+                          <AppText style={styles.link}>{t.openSourceLink}</AppText>
+                        </Pressable>
+                      ) : null}
                     </View>
                   ))}
                 </View>
@@ -107,4 +121,5 @@ const createStyles = (colors) => StyleSheet.create({
   notes: { color: colors.ink, fontSize: 15, lineHeight: 23 },
   evidence: { gap: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: spacing.md },
   evidenceRow: { gap: spacing.xxs },
+  link: { color: colors.primaryAccent, fontSize: 13 },
 });

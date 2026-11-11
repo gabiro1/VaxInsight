@@ -12,3 +12,7 @@ visible when the device is offline.
 
 The CHW dashboard uses `chw-worker-hero.png`, an original illustration generated
 for this project with OpenAI image generation and bundled locally for offline use.
+
+The Health Expert dashboard uses `reviewer-health-expert.png`, an original portrait
+visual generated for this project with OpenAI image generation and bundled
+locally for offline use.

@@ -115,9 +115,9 @@ narratives, produce model output, or provide medical conclusions.
 - Administrators with `narrative.assign` can assign, reassign, and revoke review assignments.
 - Assignment targets must be active accounts with the `reviewer` role.
 - At most one assignment is active for a narrative; prior assignments remain in history.
-- Reviewers can list and retrieve only their active assignments.
+- Health Experts can list and retrieve only their active assignments.
 - Assignment managers receive assignment metadata and review history without narrative content.
-- Reviewers can explicitly move an assignment into review or escalation.
+- Health Experts can explicitly move an assignment into review or escalation.
 - Submitted reviews are append-only and support four provisional neutral outcomes.
 - Evidence references store source title, publisher, URL, publication date, access time, and relevance.
 - Narrative owners cannot access internal review notes or review history.
@@ -180,8 +180,8 @@ The following features are not yet implemented and should not be presented as co
 - Authoritative dataset intake and assessment.
 - Machine-learning model training, inference, and evaluation.
 - SHAP/LIME explainability services.
-- Formal supervisor, privacy, and ethics confirmation for the provisional reviewer workflow.
-- Reviewer qualification policy, owner feedback, correction, and production escalation resolution.
+- Formal supervisor, privacy, and ethics confirmation for the provisional Health Expert workflow.
+- Health Expert qualification policy, owner feedback, correction, and production escalation resolution.
 - Approved public-health content and source registry.
 - In-app notifications.
 - Mobile application and Android client.

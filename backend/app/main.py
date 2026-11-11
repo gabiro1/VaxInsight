@@ -70,7 +70,7 @@ OPENAPI_TAGS = [
     {
         "name": "Narrative Reviews",
         "description": (
-            "Human reviewer assignments, structured review records, evidence, and "
+            "Human Health Expert assignments, structured review records, evidence, and "
             "explicit escalation status."
         ),
     },
@@ -90,7 +90,7 @@ OPENAPI_TAGS = [
     {
         "name": "Question Reviews",
         "description": (
-            "Reviewer-only queue and public professional responses for community "
+            "Health Expert-only queue and public professional responses for community "
             "questions."
         ),
     },
