@@ -1,0 +1,58 @@
+﻿# ==========================================
+# VACCINE AI - PYTHON DEPENDENCIES
+# ==========================================
+
+# DATA SCIENCE
+numpy
+pandas
+scipy
+
+# DATA VISUALIZATION
+matplotlib
+seaborn
+plotly
+
+# DATA FILE FORMATS
+openpyxl
+pyarrow
+
+# MACHINE LEARNING
+scikit-learn
+xgboost
+imbalanced-learn
+
+# EXPLAINABLE AI
+shap
+lime
+
+# JUPYTER ENVIRONMENT
+jupyterlab
+ipykernel
+
+# BACKEND DEVELOPMENT
+fastapi
+uvicorn[standard]
+pydantic-settings
+python-multipart
+email-validator
+python-dotenv
+
+# DATABASE
+sqlalchemy
+psycopg[binary]
+alembic
+
+# AUTHENTICATION AND SECURITY
+PyJWT[crypto]
+pwdlib[argon2]
+
+# MODEL MANAGEMENT
+joblib
+
+# TESTING
+pytest
+pytest-cov
+httpx
+
+# CODE QUALITY
+ruff

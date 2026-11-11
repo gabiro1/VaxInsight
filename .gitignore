@@ -1,0 +1,52 @@
+﻿# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+register-test.json
+
+# Sensitive and generated data
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/external/*
+!data/external/.gitkeep
+
+# Generated ML models
+models/*
+!models/.gitkeep
+
+# Logs
+*.log
+logs/
+.coverage
+
+# Jupyter
+.ipython/
+
+# IDE
+.idea/
+.vscode/
+
+# Expo local state
+.expo/
+.tmp/
+.npm-cache/
+node_modules/
+mobile/dist/
+
+# Temporary office lock files and local tool artifacts
+~$*
+.backendappschemasauth.py
+
+# Operating system
+.DS_Store
+Thumbs.db
