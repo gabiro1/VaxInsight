@@ -1,0 +1,14 @@
+# Runtime dependencies for the VaxInsight FastAPI service on Render.
+# The repository-root requirements.txt also contains notebooks and ML tooling;
+# keep the web service image focused on packages imported by the API.
+fastapi
+uvicorn[standard]
+pydantic-settings
+python-multipart
+email-validator
+python-dotenv
+sqlalchemy
+psycopg[binary]
+alembic
+PyJWT[crypto]
+pwdlib[argon2]
