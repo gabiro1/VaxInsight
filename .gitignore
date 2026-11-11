@@ -7,10 +7,19 @@ __pycache__/
 .ipynb_checkpoints/
 
 # Environment variables and secrets
-.env
 .env.*
-!.env.example
+.env*
 register-test.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.secret
+*.secrets
+credentials/
+secrets/
+.aws/
+.codex/
 
 # Sensitive and generated data
 data/raw/*
