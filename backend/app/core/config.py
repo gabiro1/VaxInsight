@@ -18,8 +18,11 @@ class Settings(BaseSettings):
     DB_PORT: int = 5432
     DB_NAME: str = "vaccine_ai"
     DB_USER: str = "postgres"
-    DB_PASSWORD: str
+    DB_PASSWORD: str | None = None
     DB_SSL_MODE: str = "prefer"
+    # Hosted PostgreSQL providers such as Neon expose a complete connection URL.
+    # Keep the DB_* fields as a local-development fallback.
+    DATABASE_URL: str | None = None
 
     # Authentication and security
     SECRET_KEY: str
@@ -70,6 +73,8 @@ class Settings(BaseSettings):
     def validate_security_settings(self):
         if len(self.SECRET_KEY) < 32:
             raise ValueError("SECRET_KEY must contain at least 32 characters")
+        if not self.DATABASE_URL and not self.DB_PASSWORD:
+            raise ValueError("DATABASE_URL or DB_PASSWORD must be configured")
         if self.ALGORITHM != "HS256":
             raise ValueError("Only the configured HS256 JWT algorithm is supported")
         if self.APP_ENV == "production" and self.DEBUG:
