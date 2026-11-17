@@ -8,11 +8,12 @@ from app.api.docs import documented_responses
 from app.core.permissions import Permission
 from app.database.dependencies import get_db
 from app.models.user import User
-from app.models.vaccine_content import ContentLanguage
+from app.models.vaccine_content import ContentLanguage, VaccineContentStatus
 from app.schemas.vaccine_content import (
     VaccineContentCreate,
     VaccineContentResponse,
 )
+from app.services.notifications import dispatch_new_vaccine_content_notification
 from app.services.vaccine_content import (
     VaccineContentConflict,
     create_vaccine_content,
@@ -118,7 +119,7 @@ def create_content(
     source = content_data.source
     # VaccineContentCreate guarantees a normalized source in its model validator.
     try:
-        return create_vaccine_content(
+        content = create_vaccine_content(
             db,
             actor=current_user,
             source_authority=source.authority,
@@ -138,3 +139,13 @@ def create_content(
             status_code=status.HTTP_409_CONFLICT,
             detail="This vaccine content version already exists",
         ) from None
+
+    if content.status == VaccineContentStatus.PUBLISHED.value:
+        try:
+            # create_vaccine_content commits before returning, so delivery cannot
+            # participate in or fail the content transaction.
+            dispatch_new_vaccine_content_notification(db, content=content)
+        except Exception:  # noqa: BLE001
+            db.rollback()
+
+    return content

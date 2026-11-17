@@ -47,6 +47,11 @@ class Settings(BaseSettings):
     SMTP_FROM: str | None = None
     SMTP_USE_TLS: bool = True
 
+    # Expo push delivery. Keep disabled until the deployment explicitly opts in.
+    EXPO_PUSH_ENABLED: bool = False
+    EXPO_PUSH_URL: str = "https://exp.host/--/api/v2/push/send"
+    EXPO_PUSH_TIMEOUT_SECONDS: float = 10.0
+
     # Rate limiting
     RATE_LIMIT_ENABLED: bool = True
     LOGIN_RATE_LIMIT: int = 10

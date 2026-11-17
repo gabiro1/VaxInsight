@@ -10,6 +10,7 @@ from app.api.routes import (
     dashboard,
     health,
     narratives,
+    notifications,
     questions,
     reviews,
     vaccine_content,
@@ -94,6 +95,13 @@ OPENAPI_TAGS = [
             "questions."
         ),
     },
+    {
+        "name": "Notifications",
+        "description": (
+            "Authenticated Expo push-device registration and published-content cadence "
+            "preferences."
+        ),
+    },
 ]
 
 
@@ -141,6 +149,7 @@ async def add_security_headers(request: Request, call_next):
         (
             "/api/v1/auth",
             "/api/v1/admin",
+            "/api/v1/notifications",
             "/api/v1/dashboard",
             "/api/v1/narratives",
             "/api/v1/reviews",
@@ -283,6 +292,11 @@ app.include_router(
     prefix="/api/v1",
 )
 
+
+app.include_router(
+    notifications.router,
+    prefix="/api/v1",
+)
 
 @app.get(
     "/",

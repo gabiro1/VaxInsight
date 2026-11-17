@@ -11,6 +11,11 @@ from app.models.auth import (
     RefreshSession,
 )
 from app.models.narrative import Narrative, NarrativeRevision, NarrativeStatus
+from app.models.notifications import (
+    NotificationDevice,
+    NotificationFrequency,
+    NotificationPreference,
+)
 from app.models.questions import (
     ProfessionalResponse,
     ProfessionalResponseStatus,
@@ -46,6 +51,9 @@ __all__ = [
     "NarrativeAssignment",
     "NarrativeReview",
     "NarrativeRevision",
+    "NotificationDevice",
+    "NotificationFrequency",
+    "NotificationPreference",
     "NarrativeStatus",
     "PasswordResetToken",
     "ProfessionalResponse",
